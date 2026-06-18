@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Навички та доступність — Volunteer Hub{% endblock %}
+{% block content %}
+<section class="hero compact">
+  <div>
+    <p class="eyebrow">Профіль участі</p>
+    <h1>Навички та доступність</h1>
+    <p>Ці дані використовуються для підбору ініціатив.</p>
+  </div>
+</section>
+<section class="panel">
+  <form method="post" class="smart-form">
+    {% csrf_token %}
+    {% include 'components/form_errors.html' %}
+    {% for field in form %}
+      {% if field.field.widget.input_type == 'checkbox' and field.field.widget.allow_multiple_selected %}
+        <div class="field-block choice-field {% if field.errors %}has-error{% endif %}">
+          <span>{{ field.label }}</span>
+          <div class="choice-options skill-checkboxes">{{ field }}</div>
+        </div>
+      {% else %}
+        <label class="field-block {% if field.errors %}has-error{% endif %} {% if field.field.widget.input_type == 'checkbox' %}checkbox-field{% endif %}">
+          <span>{{ field.label }}</span>
+          {{ field }}
+        </label>
+      {% endif %}
+    {% endfor %}
+    <button class="btn btn-primary">Оновити</button>
+  </form>
+</section>
+{% endblock %}

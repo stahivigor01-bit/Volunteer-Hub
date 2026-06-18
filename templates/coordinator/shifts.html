@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% load hub_extras %}
+{% block title %}Зміни — Volunteer Hub{% endblock %}
+{% block content %}
+{% if user.is_org_manager %}<div class="manager-workspace">{% include 'manager/_nav.html' %}<section class="manager-main">{% endif %}
+<section class="hero compact">
+  <div>
+    <p class="eyebrow">Зміни</p>
+    <h1>Розклад змін</h1>
+  </div>
+  <a class="btn btn-primary" href="{% url 'shift_create' %}">Нова зміна</a>
+</section>
+
+<section class="panel">
+  <form class="inline-filter" method="get">
+    <input class="form-control" name="q" value="{{ q }}" placeholder="Пошук за зміною, ініціативою, організацією або місцем">
+    <select class="form-control" name="organization">
+      <option value="">Усі організації</option>
+      {% for org in organizations %}
+        <option value="{{ org.id }}" {% if organization == org.id|stringformat:'s' %}selected{% endif %}>{{ org.name }}</option>
+      {% endfor %}
+    </select>
+    <select class="form-control" name="status">
+      <option value="">Усі статуси</option>
+      {% for value, label in shift_statuses %}
+        <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <button class="btn btn-primary" type="submit">Знайти</button>
+    <a class="btn btn-ghost" href="{% url 'manage_shifts' %}">Скинути</a>
+  </form>
+  <div class="active-filters">
+    <span class="filter-chip">У доступі: {{ total_count }}</span>
+    <span class="filter-chip">Знайдено: {{ result_count }}</span>
+  </div>
+
+  <div class="cards-grid shift-grid">
+    {% for shift in shifts %}
+      <article class="shift-card">
+        <div class="shift-card-head">
+          <div>
+            <b>{{ shift.title }}</b>
+            <span>{{ shift.initiative.title }}</span>
+            <small>{{ shift.initiative.organization.name }}</small>
+          </div>
+          <span class="{{ shift.status|status_class }}">{{ shift.status|status_label }}</span>
+        </div>
+        <div class="shift-meta-grid">
+          <span>
+            <small>Дата</small>
+            <b>{{ shift.shift_date|date:'d.m.Y' }}</b>
+          </span>
+          <span>
+            <small>Час</small>
+            <b>{{ shift.start_time|time:'H:i' }}–{{ shift.end_time|time:'H:i' }}</b>
+          </span>
+          <span>
+            <small>Місце</small>
+            <b>{{ shift.location|default:shift.initiative.city }}</b>
+          </span>
+          <span>
+            <small>Місця</small>
+            <b>{{ shift.approved_count }}/{{ shift.max_volunteers }}</b>
+          </span>
+        </div>
+        <div class="capacity-line">
+          <span>{{ shift.remaining_spots }} доступно</span>
+          <span class="admin-table-actions">
+            <a class="btn btn-small" href="{% url 'shift_edit' shift.id %}">Редагувати</a>
+            <form method="post" action="{% url 'shift_delete' shift.id %}" data-confirm data-confirm-title="Видалити зміну?" data-confirm-message="Зміну та заявки саме на цю зміну буде видалено." data-confirm-action="Видалити">
+              {% csrf_token %}
+              <button class="btn btn-small btn-danger" type="submit">Видалити</button>
+            </form>
+          </span>
+        </div>
+      </article>
+    {% empty %}
+      <div class="empty-state wide">
+        <h3>Змін не знайдено</h3>
+        <p>Змініть пошуковий запит або створіть нову зміну.</p>
+      </div>
+    {% endfor %}
+  </div>
+
+  {% include 'components/pagination.html' %}
+</section>
+{% if user.is_org_manager %}</section></div>{% endif %}
+{% endblock %}

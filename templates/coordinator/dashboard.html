@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% load hub_extras %}
+{% block title %}Панель координатора — Volunteer Hub{% endblock %}
+{% block content %}
+<section class="coordinator-shell">
+  <div class="coordinator-summary">
+    <div class="coordinator-primary">
+      <p class="eyebrow">Координація</p>
+      <h1>Координаційний центр</h1>
+      <p>Контроль заявок, змін, годин і термінових ініціатив організації.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="{% url 'initiative_create' %}">Нова ініціатива</a>
+        <a class="btn btn-ghost" href="{% url 'shift_create' %}">Нова зміна</a>
+      </div>
+    </div>
+    <div class="coordinator-link-panel">
+      <span>Навігація</span>
+      <div class="quick-actions">
+        <a class="btn btn-ghost" href="{% url 'coordinator_dashboard' %}">Панель</a>
+        <a class="btn btn-ghost" href="{% url 'manage_initiatives' %}">Ініціативи</a>
+        <a class="btn btn-ghost" href="{% url 'initiative_create' %}">Нова ініціатива</a>
+        <a class="btn btn-ghost" href="{% url 'review_applications' %}">Заявки</a>
+        <a class="btn btn-ghost" href="{% url 'manage_shifts' %}">Зміни</a>
+        <a class="btn btn-ghost" href="{% url 'shift_create' %}">Нова зміна</a>
+        <a class="btn btn-ghost" href="{% url 'review_hours' %}">Години</a>
+        <a class="btn btn-ghost" href="{% url 'message_threads' %}">Повідомлення</a>
+        <a class="btn btn-ghost" href="{% url 'notifications' %}">Сповіщення</a>
+        <a class="btn btn-ghost" href="{% url 'profile' %}">Профіль</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="coordinator-kpis">
+    <a class="coordinator-stat" href="{% url 'manage_initiatives' %}">
+      <span>Усього ініціатив</span>
+      <b>{{ initiatives_count }}</b>
+      <small>{{ active_initiatives }} опубліковано</small>
+    </a>
+    <a class="coordinator-stat accent" href="{% url 'review_applications' %}">
+      <span>Заявки на розгляді</span>
+      <b>{{ pending_apps }}</b>
+      <small>Потребують рішення</small>
+    </a>
+    <a class="coordinator-stat" href="{% url 'review_hours' %}">
+      <span>Години на перевірці</span>
+      <b>{{ pending_hours }}</b>
+      <small>Очікують підтвердження</small>
+    </a>
+    <div class="coordinator-stat">
+      <span>Організації</span>
+      <b>{{ organizations_count }}</b>
+      <small>У вашій зоні керування</small>
+    </div>
+  </div>
+</section>
+
+<section class="coordinator-board">
+  <div class="panel operations-panel">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">Розклад</p>
+        <h2>Найближчі зміни</h2>
+      </div>
+      <a class="btn btn-small" href="{% url 'manage_shifts' %}">Усі зміни</a>
+    </div>
+    <div class="operation-list">
+      {% for shift in upcoming_shifts %}
+        <a class="operation-row" href="{% url 'shift_edit' shift.id %}">
+          <span class="row-main">
+            <b>{{ shift.title }}</b>
+            <small>{{ shift.initiative.title }}</small>
+          </span>
+          <span class="row-meta">
+            <b>{{ shift.shift_date|date:'d.m.Y' }} · {{ shift.start_time|time:'H:i' }}</b>
+            <small>{{ shift.approved_count }}/{{ shift.max_volunteers }} місць</small>
+          </span>
+        </a>
+      {% empty %}
+        <div class="coordinator-empty">Найближчих змін ще немає.</div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="panel operations-panel">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">Пріоритет</p>
+        <h2>Термінові ініціативи</h2>
+      </div>
+      <a class="btn btn-small" href="{% url 'manage_initiatives' %}">Керувати</a>
+    </div>
+    <div class="operation-list">
+      {% for item in urgent %}
+        <a class="operation-row" href="{% url 'initiative_detail' item.slug %}">
+          <span class="row-main">
+            <b>{{ item.title }}</b>
+            <small>{{ item.city }} · {{ item.format|format_label }}</small>
+          </span>
+          <span class="row-meta">
+            <span class="{{ item.urgency_level|urgency_class }}">{{ item.urgency_level|urgency_label }}</span>
+            <small>{{ item.remaining_spots }} місць</small>
+          </span>
+        </a>
+      {% empty %}
+        <div class="coordinator-empty">Термінових ініціатив немає.</div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

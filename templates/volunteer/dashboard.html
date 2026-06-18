@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load hub_extras %}
+{% block title %}Панель волонтера — Volunteer Hub{% endblock %}
+{% block content %}
+<section class="hero compact">
+  <div>
+    <p class="eyebrow">Профіль участі</p>
+    <h1>Вітаємо, {{ user.full_name }}</h1>
+    <p>Ваші заявки, години, сертифікати й рекомендовані місії.</p>
+  </div>
+  <div class="profile-actions">
+    <span>Навігація волонтера</span>
+    <div class="quick-actions">
+      <a class="btn btn-primary" href="{% url 'initiative_catalog' %}">Знайти ініціативу</a>
+      <a class="btn btn-ghost" href="{% url 'volunteer_dashboard' %}">Панель</a>
+      <a class="btn btn-ghost" href="{% url 'my_applications' %}">Мої заявки</a>
+      <a class="btn btn-ghost" href="{% url 'my_hours' %}">Мої години</a>
+      <a class="btn btn-ghost" href="{% url 'my_certificates' %}">Сертифікати</a>
+      <a class="btn btn-ghost" href="{% url 'availability' %}">Навички та доступність</a>
+      <a class="btn btn-ghost" href="{% url 'message_threads' %}">Повідомлення</a>
+      <a class="btn btn-ghost" href="{% url 'notifications' %}">Сповіщення</a>
+      <a class="btn btn-ghost" href="{% url 'profile' %}">Профіль</a>
+    </div>
+  </div>
+</section>
+
+<div class="metrics-grid">
+  <div class="metric-card"><b>{{ hours_total }}</b><span>підтверджених годин</span></div>
+  <div class="metric-card"><b>{{ applications.count }}</b><span>активних заявок</span></div>
+  <div class="metric-card"><b>{{ certificates_count }}</b><span>сертифікатів</span></div>
+</div>
+
+<section class="two-column">
+  <div class="panel">
+    <h2>Останні заявки</h2>
+    {% for app in applications %}
+      <div class="list-row">
+        <span>{{ app.initiative.title }}</span>
+        <b class="{{ app.status|status_class }}">{{ app.status|status_label }}</b>
+      </div>
+    {% empty %}
+      <div class="empty-state">
+        <h3>Заявок ще немає</h3>
+        <p>Каталог підбере місії за вашими навичками.</p>
+      </div>
+    {% endfor %}
+    <a class="btn btn-ghost" href="{% url 'my_applications' %}">Усі заявки</a>
+  </div>
+
+  <div class="panel">
+    <h2>Сповіщення</h2>
+    {% for note in notifications %}
+      <div class="notice-card">
+        <b>{{ note.title }}</b>
+        <p>{{ note.body }}</p>
+      </div>
+    {% empty %}
+      <p class="muted">Нових сповіщень немає.</p>
+    {% endfor %}
+    <a class="btn btn-ghost" href="{% url 'notifications' %}">Усі сповіщення</a>
+  </div>
+</section>
+
+<section class="section-head">
+  <h2>Рекомендовані місії</h2>
+  <a href="{% url 'availability' %}">Оновити навички →</a>
+</section>
+<div class="cards-grid initiative-grid">
+  {% for initiative in suggested %}
+    <article class="mission-card">
+      <div class="card-body">
+        <h3><a href="{% url 'initiative_detail' initiative.slug %}">{{ initiative.title }}</a></h3>
+        <p>{{ initiative.short_description }}</p>
+        <span class="badge badge-sky">Збіг {{ initiative.matching }}%</span>
+      </div>
+    </article>
+  {% endfor %}
+</div>
+{% endblock %}

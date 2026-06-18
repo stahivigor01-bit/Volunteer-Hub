@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% load hub_extras %}
+{% block title %}Волонтерські години — Volunteer Hub{% endblock %}
+{% block content %}
+<section class="hero compact">
+  <div>
+    <p class="eyebrow">Години</p>
+    <h1>Подання і підтвердження годин</h1>
+  </div>
+</section>
+<section class="two-column">
+  <div class="panel">
+    <h2>Подати години</h2>
+    <form method="post" enctype="multipart/form-data" class="smart-form" data-confirm data-confirm-title="Подати години на перевірку?" data-confirm-message="Після подання координатор побачить цей запис і зможе підтвердити або відхилити години." data-confirm-action="Подати">
+      {% csrf_token %}
+      {% include 'components/form_errors.html' %}
+      {% for field in form %}
+        <label class="field-block {% if field.errors %}has-error{% endif %} {% if field.field.widget.input_type == 'checkbox' %}checkbox-field danger-checkbox{% endif %}">
+          <span>{{ field.label }}</span>
+          {{ field }}
+        </label>
+      {% endfor %}
+      <button class="btn btn-primary" type="submit">Подати на перевірку</button>
+    </form>
+  </div>
+  <div class="panel">
+    <h2>Історія</h2>
+    {% for hour in hours %}
+      <div class="list-row"><span>{{ hour.initiative.title }} · {{ hour.hours }} год.</span><b class="{{ hour.status|status_class }}">{{ hour.get_status_display }}</b></div>
+    {% empty %}
+      <p class="muted">Години ще не подавались.</p>
+    {% endfor %}
+    {% include 'components/pagination.html' %}
+  </div>
+</section>
+{% endblock %}

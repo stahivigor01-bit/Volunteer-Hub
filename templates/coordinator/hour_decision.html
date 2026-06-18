@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load hub_extras %}
+{% block title %}Перевірка годин — Volunteer Hub{% endblock %}
+{% block content %}
+{% if user.is_org_manager %}<div class="manager-workspace">{% include 'manager/_nav.html' %}<section class="manager-main">{% endif %}
+<section class="hero compact">
+  <div>
+    <p class="eyebrow">Перевірка годин</p>
+    <h1>{{ hour.volunteer.full_name }}</h1>
+    <p>{{ hour.initiative.title }}</p>
+  </div>
+  <a class="btn btn-ghost" href="{% url 'review_hours' %}">До списку годин</a>
+</section>
+
+<div class="metrics-grid">
+  <div class="metric-card"><b>{{ hour.hours }}</b><span>годин у записі</span></div>
+  <div class="metric-card"><b class="{{ hour.status|status_class }}">{{ hour.get_status_display }}</b><span>поточний статус</span></div>
+  <div class="metric-card"><b>{{ volunteer_stats.approved_hours }}</b><span>підтверджених годин волонтера</span></div>
+  <div class="metric-card"><b>{{ volunteer_stats.submitted }}</b><span>усіх подань волонтера</span></div>
+</div>
+
+<section class="hour-decision-layout">
+  <div class="panel decision-card">
+    <div class="section-head compact-head">
+      <div>
+        <p class="eyebrow">Подання</p>
+        <h2>Дані про виконану роботу</h2>
+      </div>
+      <span class="{{ hour.status|status_class }}">{{ hour.get_status_display }}</span>
+    </div>
+    <div class="detail-list">
+      <p><b>Волонтер:</b> {{ hour.volunteer.full_name }}</p>
+      <p><b>Email:</b> {{ hour.volunteer.email }}</p>
+      <p><b>Ініціатива:</b> {{ hour.initiative.title }}</p>
+      <p><b>Організація:</b> {{ hour.initiative.organization.name }}</p>
+      <p><b>Зміна:</b> {% if hour.shift %}{{ hour.shift.title }} · {{ hour.shift.shift_date|date:'d.m.Y' }} · {{ hour.shift.start_time|time:'H:i' }}–{{ hour.shift.end_time|time:'H:i' }}{% else %}Загальна участь без конкретної зміни{% endif %}</p>
+      <p><b>Дата подання:</b> {{ hour.submitted_at|date:'d.m.Y H:i' }}</p>
+      {% if hour.reviewed_at %}
+        <p><b>Перевірено:</b> {{ hour.reviewed_at|date:'d.m.Y H:i' }}{% if hour.reviewed_by %} · {{ hour.reviewed_by.full_name }}{% endif %}</p>
+      {% endif %}
+    </div>
+    <h3>Опис виконаної роботи</h3>
+    <p class="decision-text">{{ hour.description }}</p>
+    <h3>Підтвердження</h3>
+    {% if hour.evidence_file %}
+      <a class="btn btn-ghost evidence-link" href="{{ hour.evidence_file.url }}" target="_blank" rel="noopener">Відкрити файл підтвердження</a>
+    {% else %}
+      <p class="muted">Файл підтвердження не додано.</p>
+    {% endif %}
+    {% if hour.review_comment %}
+      <h3>Попередній коментар</h3>
+      <p class="decision-text">{{ hour.review_comment }}</p>
+    {% endif %}
+  </div>
+
+  <section class="panel form-panel">
+    <div class="section-head compact-head">
+      <div>
+        <p class="eyebrow">Рішення</p>
+        <h2>Оновити статус годин</h2>
+      </div>
+    </div>
+    <form method="post" class="smart-form">
+      {% csrf_token %}
+      {% include 'components/form_errors.html' %}
+      {% for field in form %}
+        <label class="field-block {% if field.errors %}has-error{% endif %}">
+          <span>{{ field.label }}</span>
+          {{ field }}
+          {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+        </label>
+      {% endfor %}
+      <div class="form-actions">
+        <button class="btn btn-primary" type="submit">Зберегти рішення</button>
+        <a class="btn btn-ghost" href="{% url 'review_hours' %}">Назад</a>
+      </div>
+    </form>
+  </section>
+</section>
+{% if user.is_org_manager %}</section></div>{% endif %}
+{% endblock %}

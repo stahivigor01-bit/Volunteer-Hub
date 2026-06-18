@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load hub_extras %}
+{% block title %}Координатори організації — Volunteer Hub{% endblock %}
+{% block content %}
+<div class="manager-workspace">
+  {% include 'manager/_nav.html' %}
+  <section class="manager-main">
+    <div class="manager-hero compact-surface">
+      <div>
+        <p class="eyebrow">Команда</p>
+        <h1>Координатори</h1>
+        <p>Пошук координаторів, їхніх контактів, закріплених організацій і операційної активності.</p>
+      </div>
+      <a class="btn btn-primary" href="{% url 'manager_organizations' %}">Керувати призначеннями</a>
+    </div>
+
+    <section class="panel">
+      <form class="filter-panel small manager-filter" method="get">
+        <label><span>Пошук</span><input class="form-control" name="q" value="{{ q }}" placeholder="ПІБ, email або телефон"></label>
+        <label><span>Організація</span>
+          <select class="form-control" name="organization">
+            <option value="">Усі організації</option>
+            {% for org in organizations %}
+              <option value="{{ org.id }}" {% if organization == org.id|stringformat:'s' %}selected{% endif %}>{{ org.name }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label><span>Місто</span>
+          <select class="form-control" name="city">
+            <option value="">Усі міста</option>
+            {% for item in city_options %}
+              <option value="{{ item }}" {% if city == item %}selected{% endif %}>{{ item }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label><span>Стан</span>
+          <select class="form-control" name="status">
+            <option value="">Усі стани</option>
+            {% for value, label in statuses %}
+              <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <div class="filter-actions">
+          <button class="btn btn-primary" type="submit">Знайти</button>
+          <a class="btn btn-ghost" href="{% url 'manager_coordinators' %}">Скинути</a>
+        </div>
+      </form>
+
+      <div class="manager-team-grid">
+        {% for person in coordinators %}
+          <article class="manager-team-card">
+            <div class="manager-avatar">{{ person.full_name|slice:':1' }}</div>
+            <div>
+              <div class="capacity-line">
+                <h3>{{ person.full_name }}</h3>
+                <span class="{{ person.status|status_class }}">{{ person.status|status_label }}</span>
+              </div>
+              <p>{{ person.email }}{% if person.phone %} · {{ person.phone }}{% endif %}</p>
+              <div class="manager-team-meta">
+                <span><b>{{ person.city|default:'—' }}</b><small>Місто</small></span>
+                <span><b>{{ person.managed_orgs_total }}</b><small>Організацій</small></span>
+                <span><b>{{ person.created_initiatives_total }}</b><small>Створених ініціатив</small></span>
+              </div>
+              <div class="status-line stacked"><span>Закріплення</span>{% include 'components/person_chips.html' with people=person.visible_organizations empty_text='Не призначено' %}</div>
+            </div>
+          </article>
+        {% empty %}
+          <div class="manager-empty wide">Координаторів за обраними фільтрами не знайдено.</div>
+        {% endfor %}
+      </div>
+
+      {% include 'components/pagination.html' %}
+    </section>
+  </section>
+</div>
+{% endblock %}

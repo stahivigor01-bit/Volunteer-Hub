@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load static hub_extras %}
+{% block title %}Volunteer Hub — координація волонтерських ініціатив{% endblock %}
+{% block content %}
+<section class="hero poster-hero image-hero" style="--hero-photo: url('{{ design_assets.hero_volunteers }}')">
+  <div class="hero-copy">
+    <p class="eyebrow">Волонтерська платформа</p>
+    <h1>Координуйте допомогу там, де вона потрібна зараз</h1>
+    <p>Ініціативи, заявки, зміни, підтверджені години, сертифікати й комунікація з координаторами — в одному локальному вебзастосунку.</p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="{% url 'initiative_catalog' %}">Знайти ініціативу</a>
+      <a class="btn btn-ghost" href="{% url 'register' %}">Стати волонтером</a>
+    </div>
+  </div>
+  <div class="hero-stats">
+    <div><b>{{ numbers.approved_hours }}</b><span>годин підтверджено</span></div>
+    <div><b>{{ numbers.active_initiatives }}</b><span>активних місій</span></div>
+    <div><b>{{ numbers.active_volunteers }}</b><span>волонтерів</span></div>
+    <div><b>{{ numbers.urgent }}</b><span>термінових потреб</span></div>
+  </div>
+</section>
+<section class="section-head"><div><p class="eyebrow">Активні місії</p><h2>Ініціативи, де потрібна допомога</h2></div><a href="{% url 'initiative_catalog' %}">Усі ініціативи →</a></section>
+<div class="cards-grid initiative-grid">
+  {% for initiative in initiatives %}
+    <article class="mission-card">
+      <a href="{% url 'initiative_detail' initiative.slug %}" class="image-wrap">
+        {% if initiative.image %}<img src="{{ initiative.image.url }}" alt="{{ initiative.title }}" loading="eager" decoding="async" fetchpriority="{% if forloop.counter <= 3 %}high{% else %}auto{% endif %}">{% else %}<img src="{{ design_assets.default_initiative }}" alt="{{ initiative.title }}" loading="eager" decoding="async" fetchpriority="{% if forloop.counter <= 3 %}high{% else %}auto{% endif %}">{% endif %}
+        <span class="urgency-ribbon {{ initiative.urgency_level }}">{{ initiative.urgency_level|urgency_label }}</span>
+      </a>
+      <div class="card-body">
+        <div class="card-meta"><span>{{ initiative.category.name }}</span><span>{{ initiative.city }}</span></div>
+        <h3><a href="{% url 'initiative_detail' initiative.slug %}">{{ initiative.title }}</a></h3>
+        <p>{{ initiative.short_description }}</p>
+        <div class="skill-row">{% for skill in initiative.required_skills.all|slice:':3' %}<span class="tag">{{ skill.name }}</span>{% endfor %}</div>
+      </div>
+    </article>
+  {% endfor %}
+</div>
+<section class="split-section">
+  <div class="story-photo"><img src="{{ design_assets.aid_packing }}" alt="Волонтери пакують допомогу" loading="eager" decoding="async" fetchpriority="auto"></div>
+  <div class="timeline-card">
+    <p class="eyebrow">Як це працює</p>
+    <h2>Від заявки до підтверджених годин</h2>
+    <div><span>01</span><b>Оберіть місію</b><p>Фільтри за містом, терміновістю, навичками та форматом.</p></div>
+    <div><span>02</span><b>Подайте заявку</b><p>Координатор підтвердить участь або попросить уточнення.</p></div>
+    <div><span>03</span><b>Підтвердьте години</b><p>Після перевірки формується волонтерський вплив і сертифікат.</p></div>
+  </div>
+</section>
+<section class="section-head"><div><p class="eyebrow">Партнери</p><h2>Організації на платформі</h2></div><a href="{% url 'organizations' %}">Переглянути →</a></section>
+<div class="org-strip org-grid-scroll">
+  {% for org in organizations %}
+    <a href="{% url 'organization_detail' org.slug %}" class="org-chip">
+      {% if org.logo %}<img src="{{ org.logo.url }}" alt="{{ org.name }}" loading="eager" decoding="async" fetchpriority="auto">{% endif %}
+      <span>{{ org.name }}</span>
+    </a>
+  {% endfor %}
+</div>
+{% endblock %}

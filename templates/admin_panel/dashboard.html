@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load hub_extras %}
+{% block title %}Адмін-панель — Volunteer Hub{% endblock %}
+{% block content %}
+<div class="admin-workspace">
+  {% include 'admin_panel/_nav.html' %}
+  <section class="admin-main">
+    <div class="admin-hero">
+      <div>
+        <p class="eyebrow">Адміністративний контроль</p>
+        <h1>Адміністративний центр</h1>
+        <p>Операційний контроль користувачів, організацій, заявок, годин, сертифікатів і журналу дій платформи.</p>
+      </div>
+      <a class="btn btn-primary" href="{% url 'admin_users' %}">Керувати доступами</a>
+    </div>
+
+    <div class="metrics-grid">
+      <div class="metric-card"><b>{{ numbers.total_users }}</b><span>користувачів</span></div>
+      <div class="metric-card"><b>{{ numbers.active_initiatives }}</b><span>активних ініціатив</span></div>
+      <div class="metric-card"><b>{{ numbers.pending_applications }}</b><span>заявок на розгляді</span></div>
+      <div class="metric-card"><b>{{ numbers.approved_hours }}</b><span>підтверджених годин</span></div>
+    </div>
+
+    <div class="admin-grid">
+      <article class="admin-card">
+        <h3>Швидкі дії</h3>
+        <a class="btn btn-ghost" href="{% url 'admin_user_create' %}">Новий користувач</a>
+        <a class="btn btn-ghost" href="{% url 'organization_create' %}">Нова організація</a>
+        <a class="btn btn-ghost" href="{% url 'category_create' %}">Нова категорія</a>
+      </article>
+      <article class="admin-card">
+        <h3>Категорії впливу</h3>
+        {% for category in categories|slice:':5' %}
+          <div class="status-line"><span>{{ category.name }}</span><b>{{ category.total }}</b></div>
+        {% empty %}
+          <p class="muted">Категорії ще не створені.</p>
+        {% endfor %}
+      </article>
+    </div>
+
+    <section class="panel">
+      <div class="section-head" style="margin-top:0"><div><p class="eyebrow">Журнал дій</p><h2>Останні дії</h2></div><a href="{% url 'admin_analytics' %}">Аналітика</a></div>
+      {% for log in recent_logs %}
+        <div class="list-row">
+          <span><b>{{ log.action }}</b> · {{ log.entity_type }} #{{ log.entity_id }}</span>
+          <small>{{ log.actor.full_name|default:'Система' }} · {{ log.created_at|date:'d.m.Y H:i' }}</small>
+        </div>
+      {% empty %}
+        <div class="admin-empty">Аудит поки порожній.</div>
+      {% endfor %}
+    </section>
+  </section>
+</div>
+{% endblock %}

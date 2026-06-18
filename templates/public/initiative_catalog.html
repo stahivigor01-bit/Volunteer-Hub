@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% load hub_extras %}
+{% block title %}Каталог ініціатив — Volunteer Hub{% endblock %}
+{% block content %}
+<section class="hero compact"><div><p class="eyebrow">Каталог місій</p><h1>Знайдіть ініціативу за навичками, містом і терміновістю</h1><p>Добирайте місії за регіоном, форматом участі, доступними місцями та потрібними навичками.</p></div></section>
+<form class="filter-panel" hx-get="{% url 'initiative_catalog' %}" hx-target="#initiative-results" hx-trigger="change, submit, keyup delay:450ms from:input[name='q']">
+  <label><span>Пошук</span><input class="form-control" type="search" name="q" value="{{ filters.q }}" placeholder="Назва, опис, організація"></label>
+  <label><span>Місто/регіон</span><input class="form-control" name="city" value="{{ filters.city }}" placeholder="Наприклад, Львів"></label>
+  <label><span>Категорія</span><select class="form-control" name="category"><option value="">Усі категорії</option>{% for cat in categories %}<option value="{{ cat.id }}" {% if filters.category == cat.id|stringformat:'s' %}selected{% endif %}>{{ cat.name }}</option>{% endfor %}</select></label>
+  <label><span>Терміновість</span><select class="form-control" name="urgency"><option value="">Будь-яка</option><option value="low">Низька</option><option value="medium">Середня</option><option value="high">Висока</option><option value="emergency">Термінова</option></select></label>
+  <label><span>Формат</span><select class="form-control" name="format"><option value="">Будь-який</option><option value="offline">Офлайн</option><option value="online">Онлайн</option><option value="hybrid">Гібридна</option></select></label>
+  <label><span>Навичка</span><select class="form-control" name="skill"><option value="">Усі навички</option>{% for skill in skills %}<option value="{{ skill.id }}">{{ skill.name }}</option>{% endfor %}</select></label>
+  <label><span>Сортування</span><select class="form-control" name="sort"><option value="newest">Нові спочатку</option><option value="date">Найближча дата</option><option value="urgency">За терміновістю</option><option value="spots">За місцями</option></select></label>
+  <label><span>Показ</span><select class="form-control" name="page_size"><option value="8" {% if filters.page_size == '8' %}selected{% endif %}>8</option><option value="12" {% if filters.page_size == '12' %}selected{% endif %}>12</option><option value="16" {% if filters.page_size == '16' %}selected{% endif %}>16</option><option value="24" {% if filters.page_size == '24' %}selected{% endif %}>24</option></select></label>
+  <div class="filter-switches"><label><input type="checkbox" name="beginner" value="1" {% if filters.beginner %}checked{% endif %}> Новачкам підходить</label><label><input type="checkbox" name="spots" value="1" {% if filters.spots %}checked{% endif %}> Є місця</label></div>
+  <div class="filter-actions"><button class="btn btn-primary" type="submit">Фільтрувати</button><a class="btn btn-ghost" href="{% url 'initiative_catalog' %}">Скинути</a></div>
+</form>
+<div class="active-filters">{% if filters.q %}<span class="filter-chip">Пошук: {{ filters.q }}</span>{% endif %}{% if filters.city %}<span class="filter-chip">Місто: {{ filters.city }}</span>{% endif %}{% if filters.beginner %}<span class="filter-chip">Новачкам підходить</span>{% endif %}</div>
+<div id="initiative-results">{% include 'partials/initiative_grid.html' %}</div>
+{% endblock %}

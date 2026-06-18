@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Вхід — Volunteer Hub{% endblock %}
+{% block content %}
+<section class="auth-shell auth-single">
+  <div class="auth-card">
+    <p class="eyebrow">Авторизація</p>
+    <h1>Повернення до місій</h1>
+    <form method="post" class="smart-form">
+      {% csrf_token %}
+      {% include 'components/form_errors.html' %}
+      {% for field in form %}
+        <label class="field-block {% if field.errors %}has-error{% endif %}">
+          <span>{{ field.label }}</span>
+          {{ field }}
+        </label>
+      {% endfor %}
+      <button class="btn btn-primary" type="submit">Увійти</button>
+    </form>
+    <p>Немає акаунта? <a href="{% url 'register' %}">Зареєструватися</a></p>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% load hub_extras %}
+{% block title %}{{ initiative.title }} — Volunteer Hub{% endblock %}
+{% block content %}
+<section class="detail-hero">
+  <div class="detail-image">{% if initiative.image %}<img src="{{ initiative.image.url }}" alt="{{ initiative.title }}" loading="eager" decoding="async" fetchpriority="high">{% else %}<img src="{{ design_assets.default_initiative }}" alt="{{ initiative.title }}" loading="eager" decoding="async" fetchpriority="high">{% endif %}</div>
+  <div class="detail-copy">
+    <p class="eyebrow">{{ initiative.category.name }} · {{ initiative.format|format_label }}</p>
+    <h1>{{ initiative.title }}</h1>
+    <p>{{ initiative.short_description }}</p>
+    <div class="detail-badges"><span class="{{ initiative.urgency_level|urgency_class }}">{{ initiative.urgency_level|urgency_label }}</span><span class="badge badge-sky">{{ initiative.city }}</span>{% if initiative.beginner_friendly %}<span class="badge badge-success">Новачкам підходить</span>{% endif %}{% if matching %}<span class="badge badge-orange">Збіг навичок {{ matching }}%</span>{% endif %}</div>
+    <div class="capacity-line"><span>Потрібно {{ initiative.required_volunteers_count }} волонтерів</span><strong>{{ initiative.remaining_spots }} місць доступно</strong></div>
+    <div class="progress"><i style="width: {{ initiative.approved_volunteers_count|percent:initiative.required_volunteers_count }}%"></i></div>
+    {% if user_application %}<div class="notice">Ви вже маєте заявку: <b>{{ user_application.status|status_label }}</b></div>{% elif user.is_authenticated and user.is_volunteer %}<button class="btn btn-primary" data-open-modal="apply-modal">Подати заявку</button>{% elif not user.is_authenticated %}<a class="btn btn-primary" href="{% url 'login' %}">Увійти для заявки</a>{% endif %}
+  </div>
+</section>
+<section class="two-column">
+  <div class="panel"><h2>Опис місії</h2><p>{{ initiative.description|linebreaks }}</p><h3>Потрібні навички</h3><div class="skill-row">{% for skill in initiative.required_skills.all %}<span class="tag">{{ skill.name }}</span>{% empty %}<span class="muted">Спеціальні навички не потрібні</span>{% endfor %}</div><h3>Безпека та доступність</h3><p>{{ initiative.safety_notes|default:'Координатор повідомить деталі перед початком.' }}</p><p>{{ initiative.accessibility_notes|default:'Додаткові умови доступності уточнюються координатором.' }}</p></div>
+  <aside class="panel sticky-card"><h3>Картка місії</h3><p><b>Організація:</b> <a href="{% url 'organization_detail' initiative.organization.slug %}">{{ initiative.organization.name }}</a></p><p><b>Дати:</b> {{ initiative.start_date }} — {{ initiative.end_date }}</p><p><b>Локація:</b> {{ initiative.location_address|default:initiative.city }}</p><p><b>Вплив:</b> {{ initiative.expected_impact|default:'Підтримка громади' }}</p><p><b>Контакт:</b> {{ initiative.contact_person|default:'Координатор ініціативи' }}</p></aside>
+</section>
+<section class="section-head"><p class="eyebrow">Зміни</p><h2>Доступні слоти участі</h2></section>
+<div class="cards-grid shift-grid">{% for shift in initiative.shifts.all %}<div class="shift-card"><b>{{ shift.title }}</b><span>{{ shift.shift_date }} · {{ shift.start_time }}–{{ shift.end_time }}</span><small>{{ shift.location|default:initiative.location_address }}</small><div class="capacity-line"><span>{{ shift.approved_count }}/{{ shift.max_volunteers }}</span><strong>{{ shift.status|status_label }}</strong></div></div>{% empty %}<div class="empty-state wide"><h3>Зміни ще не заплановані</h3><p>Можна подати заявку на ініціативу загалом.</p></div>{% endfor %}</div>
+{% if user.is_authenticated and user.is_volunteer and not user_application %}
+<div class="modal" id="apply-modal" aria-hidden="true"><div class="modal-panel"><button class="modal-close" data-close-modal>×</button><h2>Заявка на участь</h2><p>Напишіть кілька речень про мотивацію — це допоможе координатору швидше ухвалити рішення.</p><form method="post" action="{% url 'apply_initiative' initiative.slug %}" class="smart-form">{% csrf_token %}{% include 'components/form_errors.html' %}{% for field in form %}<label class="field-block {% if field.errors %}has-error{% endif %}"><span>{{ field.label }}</span>{{ field }}</label>{% endfor %}<button class="btn btn-primary" type="submit">Надіслати заявку</button></form></div></div>
+{% endif %}
+{% endblock %}

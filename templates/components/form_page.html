@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} — Volunteer Hub{% endblock %}
+{% block content %}
+{% if user.is_org_manager %}<div class="manager-workspace">{% include 'manager/_nav.html' %}<section class="manager-main">{% endif %}
+<section class="hero compact">
+  <div>
+    <p class="eyebrow">Операційна дія</p>
+    <h1>{{ title }}</h1>
+    <p>{{ subtitle }}</p>
+  </div>
+</section>
+<section class="panel form-panel">
+  <form method="post" enctype="multipart/form-data" class="smart-form">
+    {% csrf_token %}
+    {% include 'components/form_errors.html' %}
+    {% for field in form %}
+      {% if field.field.widget.input_type == 'checkbox' and field.field.widget.allow_multiple_selected %}
+        <div class="field-block choice-field {% if field.errors %}has-error{% endif %}">
+          <span>{{ field.label }}</span>
+          <div class="choice-options">{{ field }}</div>
+          {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+        </div>
+      {% else %}
+        <label class="field-block {% if field.errors %}has-error{% endif %} {% if field.field.widget.input_type == 'checkbox' %}checkbox-field{% endif %}">
+          <span>{{ field.label }}</span>
+          {{ field }}
+          {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+        </label>
+      {% endif %}
+    {% endfor %}
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">Зберегти</button>
+      <a class="btn btn-ghost" href="javascript:history.back()">Назад</a>
+    </div>
+  </form>
+</section>
+{% if user.is_org_manager %}</section></div>{% endif %}
+{% endblock %}

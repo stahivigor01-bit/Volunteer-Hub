@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% load hub_extras %}
+{% block title %}Розгляд заявки — Volunteer Hub{% endblock %}
+{% block content %}
+{% if user.is_org_manager %}<div class="manager-workspace">{% include 'manager/_nav.html' %}<section class="manager-main">{% endif %}
+<section class="hero compact">
+  <div>
+    <p class="eyebrow">Розгляд заявки</p>
+    <h1>{{ volunteer.full_name }}</h1>
+    <p>{{ initiative.title }}</p>
+  </div>
+  <a class="btn btn-ghost" href="{% url 'review_applications' %}">До списку заявок</a>
+</section>
+
+<div class="metrics-grid">
+  <div class="metric-card"><b class="{{ application.status|status_class }}">{{ application.status|status_label }}</b><span>поточний статус</span></div>
+  <div class="metric-card"><b>{{ volunteer_stats.approved_hours }}</b><span>підтверджених годин</span></div>
+  <div class="metric-card"><b>{{ volunteer_stats.applications }}</b><span>заявок волонтера</span></div>
+  <div class="metric-card"><b>{{ volunteer_stats.certificates }}</b><span>сертифікатів</span></div>
+</div>
+
+{% if application.coordinator_comment or application.rejection_reason or application.cancel_reason %}
+  <section class="decision-notes">
+    {% if application.coordinator_comment %}
+      <article class="decision-note">
+        <span>Коментар координатора</span>
+        <p>{{ application.coordinator_comment }}</p>
+      </article>
+    {% endif %}
+    {% if application.rejection_reason %}
+      <article class="decision-note warning">
+        <span>Причина відхилення</span>
+        <p>{{ application.rejection_reason }}</p>
+      </article>
+    {% endif %}
+    {% if application.cancel_reason %}
+      <article class="decision-note muted-note">
+        <span>Причина скасування волонтером</span>
+        <p>{{ application.cancel_reason }}</p>
+      </article>
+    {% endif %}
+  </section>
+{% endif %}
+
+<section class="decision-layout">
+  <div class="panel decision-card">
+    <div class="section-head compact-head">
+      <div>
+        <p class="eyebrow">Волонтер</p>
+        <h2>{{ volunteer.full_name }}</h2>
+      </div>
+      <span class="{{ volunteer.status|status_class }}">{{ volunteer.status|status_label }}</span>
+    </div>
+    <div class="detail-list">
+      <p><b>Email:</b> {{ volunteer.email }}</p>
+      <p><b>Телефон:</b> {{ volunteer.phone|default:'Не вказано' }}</p>
+      <p><b>Місто:</b> {{ volunteer.city|default:'Не вказано' }}</p>
+      <p><b>Про себе:</b> {{ volunteer.bio|default:'Опис профілю ще не заповнено.' }}</p>
+    </div>
+    {% if availability %}
+      <div class="tag-row">
+        {% if availability.weekdays %}<span class="tag">Будні</span>{% endif %}
+        {% if availability.weekends %}<span class="tag">Вихідні</span>{% endif %}
+        {% if availability.mornings %}<span class="tag">Ранок</span>{% endif %}
+        {% if availability.afternoons %}<span class="tag">День</span>{% endif %}
+        {% if availability.evenings %}<span class="tag">Вечір</span>{% endif %}
+        {% if availability.remote_only %}<span class="tag">Тільки дистанційно</span>{% endif %}
+        {% if availability.preferred_city %}<span class="tag">{{ availability.preferred_city }}</span>{% endif %}
+      </div>
+    {% endif %}
+    <h3>Навички волонтера</h3>
+    <div class="tag-row">
+      {% for skill in volunteer_skills %}
+        <span class="tag">{{ skill.name }}</span>
+      {% empty %}
+        <span class="muted">Навички ще не вказані.</span>
+      {% endfor %}
+    </div>
+    <h3>Мотивація у заявці</h3>
+    <p class="decision-text">{{ application.motivation_text }}</p>
+  </div>
+
+  <div class="panel decision-card">
+    <div class="section-head compact-head">
+      <div>
+        <p class="eyebrow">Ініціатива</p>
+        <h2><a class="table-link" href="{% url 'initiative_detail' initiative.slug %}">{{ initiative.title }}</a></h2>
+      </div>
+      <span class="{{ initiative.status|status_class }}">{{ initiative.status|status_label }}</span>
+    </div>
+    <div class="detail-list">
+      <p><b>Організація:</b> {{ initiative.organization.name }}</p>
+      <p><b>Категорія:</b> {{ initiative.category.name }}</p>
+      <p><b>Місто:</b> {{ initiative.city }}</p>
+      <p><b>Формат:</b> {{ initiative.format|format_label }}</p>
+      <p><b>Терміновість:</b> {{ initiative.urgency_level|urgency_label }}</p>
+      <p><b>Дати:</b> {{ initiative.start_date|date:'d.m.Y' }} — {{ initiative.end_date|date:'d.m.Y' }}</p>
+      <p><b>Місця:</b> {{ initiative.approved_volunteers_count }}/{{ initiative.required_volunteers_count }}, доступно {{ initiative.remaining_spots }}</p>
+      <p><b>Зміна:</b> {% if application.shift %}{{ application.shift.title }} · {{ application.shift.shift_date|date:'d.m.Y' }} · {{ application.shift.start_time|time:'H:i' }}–{{ application.shift.end_time|time:'H:i' }}{% else %}Загальна заявка без конкретної зміни{% endif %}</p>
+      <p><b>Контакт:</b> {{ initiative.contact_person|default:'Не вказано' }}</p>
+      <p><b>Очікуваний вплив:</b> {{ initiative.expected_impact|default:'Не вказано' }}</p>
+    </div>
+    <h3>Потрібні навички</h3>
+    <div class="tag-row">
+      {% for skill in initiative.required_skills.all %}
+        <span class="tag">{{ skill.name }}</span>
+      {% empty %}
+        <span class="muted">Спеціальні навички не вказані.</span>
+      {% endfor %}
+    </div>
+    <h3>Опис</h3>
+    <p class="decision-text">{{ initiative.short_description }}</p>
+  </div>
+</section>
+
+<section class="panel form-panel">
+  <div class="section-head compact-head">
+    <div>
+      <p class="eyebrow">Рішення</p>
+      <h2>Оновити статус заявки</h2>
+    </div>
+  </div>
+  <form method="post" class="smart-form">
+    {% csrf_token %}
+    {% include 'components/form_errors.html' %}
+    {% for field in form %}
+      <label class="field-block {% if field.errors %}has-error{% endif %}">
+        <span>{{ field.label }}</span>
+        {{ field }}
+      </label>
+    {% endfor %}
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">Зберегти рішення</button>
+      <a class="btn btn-ghost" href="{% url 'review_applications' %}">Назад</a>
+    </div>
+  </form>
+</section>
+{% if user.is_org_manager %}</section></div>{% endif %}
+{% endblock %}

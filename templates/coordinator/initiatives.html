@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load hub_extras %}
+{% block title %}Керування ініціативами — Volunteer Hub{% endblock %}
+{% block content %}
+{% if user.is_org_manager %}<div class="manager-workspace">{% include 'manager/_nav.html' %}<section class="manager-main">{% endif %}
+<section class="hero compact">
+  <div>
+    <p class="eyebrow">Місії</p>
+    <h1>Ініціативи організації</h1>
+  </div>
+  <a class="btn btn-primary" href="{% url 'initiative_create' %}">Створити ініціативу</a>
+</section>
+
+<section class="panel">
+  <form class="inline-filter" method="get">
+    <input class="form-control" name="q" value="{{ q }}" placeholder="Пошук за назвою, містом або організацією">
+    <select class="form-control" name="organization">
+      <option value="">Усі організації</option>
+      {% for org in organizations %}
+        <option value="{{ org.id }}" {% if organization == org.id|stringformat:'s' %}selected{% endif %}>{{ org.name }}</option>
+      {% endfor %}
+    </select>
+    <select class="form-control" name="status">
+      <option value="">Усі статуси</option>
+      {% for value, label in initiative_statuses %}
+        <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <button class="btn btn-primary" type="submit">Знайти</button>
+    <a class="btn btn-ghost" href="{% url 'manage_initiatives' %}">Скинути</a>
+  </form>
+  <div class="active-filters">
+    <span class="filter-chip">У доступі: {{ total_count }}</span>
+    <span class="filter-chip">Знайдено: {{ result_count }}</span>
+  </div>
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>Назва</th>
+          <th>Організація</th>
+          <th>Місто</th>
+          <th>Статус</th>
+          <th>Місця</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in initiatives %}
+          <tr>
+            <td><a class="table-link" href="{% url 'initiative_detail' item.slug %}">{{ item.title }}</a></td>
+            <td>{{ item.organization.name }}</td>
+            <td>{{ item.city }}</td>
+            <td><span class="{{ item.status|status_class }}">{{ item.status|status_label }}</span></td>
+            <td>{{ item.approved_volunteers_count }}/{{ item.required_volunteers_count }}</td>
+            <td>
+              <span class="admin-table-actions">
+                <a class="btn btn-small" href="{% url 'initiative_edit' item.id %}">Редагувати</a>
+                <form method="post" action="{% url 'initiative_delete' item.id %}" data-confirm data-confirm-title="Видалити ініціативу?" data-confirm-message="Ініціативу, її зміни, заявки та пов’язані записи буде видалено." data-confirm-action="Видалити">
+                  {% csrf_token %}
+                  <button class="btn btn-small btn-danger" type="submit">Видалити</button>
+                </form>
+              </span>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6">Ініціатив за цими фільтрами немає.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% include 'components/pagination.html' %}
+</section>
+{% if user.is_org_manager %}</section></div>{% endif %}
+{% endblock %}

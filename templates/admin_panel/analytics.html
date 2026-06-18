@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load hub_extras %}
+{% block title %}Аналітика — Volunteer Hub{% endblock %}
+{% block content %}
+<div class="admin-workspace">
+  {% include 'admin_panel/_nav.html' %}
+  <section class="admin-main">
+    <div class="admin-hero">
+      <div>
+        <p class="eyebrow">Аналітика впливу</p>
+        <h1>Аналітика платформи</h1>
+        <p>Огляд навантаження, підтверджених годин, сертифікатів і волонтерської активності.</p>
+      </div>
+      <a class="btn btn-ghost" href="{% url 'admin_dashboard' %}">До огляду</a>
+    </div>
+
+    <div class="metrics-grid">
+      <div class="metric-card"><b>{{ numbers.certificates }}</b><span>сертифікатів</span></div>
+      <div class="metric-card"><b>{{ numbers.urgent }}</b><span>термінових місій</span></div>
+      <div class="metric-card"><b>{{ numbers.pending_applications }}</b><span>заявок на розгляді</span></div>
+      <div class="metric-card"><b>{{ numbers.approved_hours }}</b><span>підтверджених годин</span></div>
+    </div>
+
+    <section class="two-column">
+      <div class="panel">
+        <h2>Заявки за статусом</h2>
+        {% for row in apps_by_status %}
+          <div class="list-row"><span class="{{ row.status|status_class }}">{{ row.status|status_label }}</span><b>{{ row.total }}</b></div>
+        {% empty %}
+          <p class="muted">Заявок ще немає.</p>
+        {% endfor %}
+      </div>
+      <div class="panel">
+        <h2>Години за напрямами</h2>
+        {% for row in hours_by_category|slice:':8' %}
+          <div class="list-row"><span>{{ row.name }}</span><b>{{ row.total_hours|default:0 }} год.</b></div>
+        {% empty %}
+          <p class="muted">Підтверджених годин ще немає.</p>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Найактивніші волонтери</h2>
+      {% for person in top_volunteers %}
+        <a class="list-row linked-row" href="{% url 'admin_volunteer_detail' person.id %}"><span>{{ person.full_name }}</span><b>{{ person.total_hours|default:0 }} год.</b></a>
+      {% empty %}
+        <p class="muted">Дані ще не накопичені.</p>
+      {% endfor %}
+    </section>
+  </section>
+</div>
+{% endblock %}

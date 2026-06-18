@@ -1,0 +1,7 @@
+<div class="person-chip-list">
+  {% for person in people %}
+    <span class="person-chip">{% if person.full_name %}{{ person.full_name }}{% else %}{{ person.name }}{% endif %}</span>
+  {% empty %}
+    <span class="muted">{{ empty_text|default:'Не призначено' }}</span>
+  {% endfor %}
+</div>

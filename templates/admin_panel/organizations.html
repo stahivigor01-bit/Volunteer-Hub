@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load hub_extras %}
+{% block title %}Організації — Volunteer Hub{% endblock %}
+{% block content %}
+<div class="admin-workspace">
+  {% include 'admin_panel/_nav.html' %}
+  <section class="admin-main">
+    <div class="admin-hero">
+      <div>
+        <p class="eyebrow">Організації</p>
+        <h1>Керування організаціями</h1>
+        <p>Профілі команд, координатори, контактні дані й статус публічної присутності на платформі.</p>
+      </div>
+      <a class="btn btn-primary" href="{% url 'organization_create' %}">Нова організація</a>
+    </div>
+
+    <div class="admin-grid">
+      {% for org in organizations %}
+        <article class="admin-card">
+          {% if org.logo %}<img src="{{ org.logo.url }}" alt="{{ org.name }}" loading="eager" decoding="async" fetchpriority="{% if forloop.counter <= 4 %}high{% else %}auto{% endif %}" style="height:150px;width:100%;object-fit:cover;border-radius:14px">{% endif %}
+          <div class="capacity-line"><h3>{{ org.name }}</h3><span class="{{ org.status|status_class }}">{{ org.status|status_label }}</span></div>
+          <p>{{ org.description|truncatechars:150 }}</p>
+          <div class="status-line"><span>Місто</span><b>{{ org.city|default:'—' }}</b></div>
+          <div class="status-line"><span>Менеджер</span><b>{{ org.manager.full_name|default:'Не призначено' }}</b></div>
+          <div class="status-line stacked"><span>Координатори</span>{% include 'components/person_chips.html' with people=org.coordinators.all empty_text='Не призначено' %}</div>
+          <div class="admin-table-actions">
+            <a class="btn btn-small" href="{% url 'organization_edit' org.id %}">Редагувати</a>
+            <form method="post" action="{% url 'organization_delete' org.id %}" data-confirm data-confirm-title="Видалити організацію?" data-confirm-message="Організацію та її ініціативи буде видалено з платформи." data-confirm-action="Видалити">
+              {% csrf_token %}
+              <button class="btn btn-small btn-danger" type="submit">Видалити</button>
+            </form>
+          </div>
+        </article>
+      {% empty %}
+        <div class="admin-empty">Організації ще не створені.</div>
+      {% endfor %}
+    </div>
+    {% include 'components/pagination.html' %}
+  </section>
+</div>
+{% endblock %}

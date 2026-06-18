@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}Форма застаріла — Volunteer Hub{% endblock %}
+{% block content %}
+<section class="hero compact">
+  <div>
+    <p class="eyebrow">Безпека форми</p>
+    <h1>Форма застаріла</h1>
+    <p>Сторінка була відкрита зі старим токеном безпеки. Оновіть форму і повторіть дію.</p>
+  </div>
+</section>
+<section class="panel">
+  <div class="empty-state">
+    <h3>Запит не виконано</h3>
+    <p>Таке може статись після входу в іншій вкладці, виходу з акаунта або повернення кнопкою браузера до старої форми.</p>
+    <a class="btn btn-primary" href="{{ retry_url }}">{{ retry_label }}</a>
+  </div>
+</section>
+{% endblock %}

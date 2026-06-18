@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}Навички — Volunteer Hub{% endblock %}
+{% block content %}
+<div class="admin-workspace">
+  {% include 'admin_panel/_nav.html' %}
+  <section class="admin-main">
+    <div class="admin-hero">
+      <div>
+        <p class="eyebrow">Мапа навичок</p>
+        <h1>Навички волонтерів</h1>
+        <p>Довідник компетенцій для профілів волонтерів, підбору місій і фільтрів каталогу.</p>
+      </div>
+      <a class="btn btn-primary" href="{% url 'skill_create' %}">Нова навичка</a>
+    </div>
+
+    <div class="admin-grid">
+      {% for skill in skills %}
+        <article class="admin-card">
+          <h3>{{ skill.name }}</h3>
+          <div class="status-line"><span>Категорія</span><b>{{ skill.category|default:'Без категорії' }}</b></div>
+          <div class="admin-table-actions">
+            <a class="btn btn-small" href="{% url 'skill_edit' skill.id %}">Редагувати</a>
+            <form method="post" action="{% url 'skill_delete' skill.id %}" data-confirm data-confirm-title="Видалити навичку?" data-confirm-message="Навичку буде прибрано з довідника і пов’язаних профілів." data-confirm-action="Видалити">
+              {% csrf_token %}
+              <button class="btn btn-small btn-danger" type="submit">Видалити</button>
+            </form>
+          </div>
+        </article>
+      {% empty %}
+        <div class="admin-empty">Навички ще не створені.</div>
+      {% endfor %}
+    </div>
+    {% include 'components/pagination.html' %}
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,12 @@
+<aside class="admin-nav" aria-label="Адміністративна навігація">
+  <h2>Адміністрування</h2>
+  <a class="{% if request.resolver_match.url_name == 'admin_dashboard' %}is-active{% endif %}" href="{% url 'admin_dashboard' %}"><span>Огляд</span></a>
+  <a class="{% if request.resolver_match.url_name == 'admin_users' %}is-active{% endif %}" href="{% url 'admin_users' %}"><span>Користувачі</span></a>
+  <a class="{% if request.resolver_match.url_name == 'admin_organizations' %}is-active{% endif %}" href="{% url 'admin_organizations' %}"><span>Організації</span></a>
+  <a class="{% if request.resolver_match.url_name == 'admin_categories' %}is-active{% endif %}" href="{% url 'admin_categories' %}"><span>Категорії</span></a>
+  <a class="{% if request.resolver_match.url_name == 'admin_skills' %}is-active{% endif %}" href="{% url 'admin_skills' %}"><span>Навички</span></a>
+  <a class="{% if request.resolver_match.url_name == 'admin_analytics' %}is-active{% endif %}" href="{% url 'admin_analytics' %}"><span>Аналітика</span></a>
+  <a class="{% if request.resolver_match.url_name == 'message_threads' or request.resolver_match.url_name == 'message_thread' %}is-active{% endif %}" href="{% url 'message_threads' %}"><span>Повідомлення</span></a>
+  <a class="{% if request.resolver_match.url_name == 'notifications' %}is-active{% endif %}" href="{% url 'notifications' %}"><span>Сповіщення</span></a>
+  <a class="{% if request.resolver_match.url_name == 'profile' %}is-active{% endif %}" href="{% url 'profile' %}"><span>Профіль</span></a>
+</aside>

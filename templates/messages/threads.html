@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load hub_extras %}
+{% block title %}Повідомлення — Volunteer Hub{% endblock %}
+{% block content %}
+<section class="hero compact">
+  <div>
+    <p class="eyebrow">Повідомлення</p>
+    <h1>Робочі діалоги</h1>
+    <p>Пошук за темою, ініціативою, волонтером або координатором.</p>
+  </div>
+</section>
+
+<section class="panel inbox-panel">
+  <form class="filter-panel inbox-filter">
+    <label><span>Пошук</span><input class="form-control" name="q" value="{{ filters.q }}" placeholder="Тема, ініціатива або учасник"></label>
+    <label><span>Статус</span><select class="form-control" name="status"><option value="">Усі статуси</option>{% for value,label in statuses %}<option value="{{ value }}" {% if filters.status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+    <div class="filter-actions"><button class="btn btn-primary">Знайти</button><a class="btn btn-ghost" href="{% url 'message_threads' %}">Скинути</a></div>
+  </form>
+
+  <div class="inbox-summary">
+    <span>Знайдено діалогів</span>
+    <b>{{ total_threads }}</b>
+  </div>
+
+  <div class="thread-list">
+    {% for thread in threads %}
+      <a class="thread-row" href="{% url 'message_thread' thread.id %}">
+        <span class="{{ thread.status|status_class }}">{{ thread.status|status_label }}</span>
+        <strong>{{ thread.subject }}</strong>
+        <small>{% if thread.initiative %}{{ thread.initiative.title }}{% else %}Загальна тема{% endif %}</small>
+        <em>Оновлено {{ thread.updated_at|date:'d.m.Y H:i' }}</em>
+      </a>
+    {% empty %}
+      <div class="empty-state wide">
+        <h3>Діалогів не знайдено</h3>
+        <p>Змініть пошуковий запит або фільтр статусу.</p>
+      </div>
+    {% endfor %}
+  </div>
+  {% include 'components/pagination.html' %}
+</section>
+{% endblock %}

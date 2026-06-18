@@ -1,0 +1,14 @@
+{
+  "name": "Volunteer Hub",
+  "short_name": "VolunteerHub",
+  "icons": [
+    {
+      "src": "/static/favicon/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#0f2437",
+  "background_color": "#f6eddf",
+  "display": "standalone"
+}

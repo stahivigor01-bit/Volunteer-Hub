@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load hub_extras %}
+{% block title %}Організації менеджера — Volunteer Hub{% endblock %}
+{% block content %}
+<div class="manager-workspace">
+  {% include 'manager/_nav.html' %}
+  <section class="manager-main">
+    <div class="manager-hero compact-surface">
+      <div>
+        <p class="eyebrow">Організації</p>
+        <h1>Профілі організацій</h1>
+        <p>Редагування публічних даних, контактів, логотипу та команди координаторів.</p>
+      </div>
+    </div>
+
+    <section class="panel">
+      <form class="filter-panel small manager-filter" method="get">
+        <label><span>Пошук</span><input class="form-control" name="q" value="{{ q }}" placeholder="Назва, email або координатор"></label>
+        <label><span>Місто</span>
+          <select class="form-control" name="city">
+            <option value="">Усі міста</option>
+            {% for item in city_options %}
+              <option value="{{ item }}" {% if city == item %}selected{% endif %}>{{ item }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label><span>Статус</span>
+          <select class="form-control" name="status">
+            <option value="">Усі статуси</option>
+            {% for value, label in organization_statuses %}
+              <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <div class="filter-actions">
+          <button class="btn btn-primary" type="submit">Знайти</button>
+          <a class="btn btn-ghost" href="{% url 'manager_organizations' %}">Скинути</a>
+        </div>
+      </form>
+
+      <div class="manager-org-grid">
+        {% for org in organizations %}
+          <article class="manager-org-card">
+            {% if org.logo %}
+              <img class="manager-org-photo" src="{{ org.logo.url }}" alt="{{ org.name }}" loading="eager" decoding="async">
+            {% endif %}
+            <div class="capacity-line">
+              <h3>{{ org.name }}</h3>
+              <span class="{{ org.status|status_class }}">{{ org.status|status_label }}</span>
+            </div>
+            <p>{{ org.description|truncatechars:170 }}</p>
+            <div class="status-line"><span>Місто</span><b>{{ org.city|default:'—' }}</b></div>
+            <div class="status-line"><span>Ініціативи</span><b>{{ org.initiatives_total }}</b></div>
+            <div class="status-line"><span>Заявки на розгляді</span><b>{{ org.pending_applications_total }}</b></div>
+            <div class="status-line stacked"><span>Координатори</span>{% include 'components/person_chips.html' with people=org.coordinators.all empty_text='Не призначено' %}</div>
+            <div class="admin-table-actions">
+              <a class="btn btn-small" href="{% url 'manager_organization_edit' org.id %}">Редагувати</a>
+              <a class="btn btn-small btn-ghost" href="{% url 'organization_detail' org.slug %}">Публічна сторінка</a>
+            </div>
+          </article>
+        {% empty %}
+          <div class="manager-empty wide">Організацій за обраними фільтрами не знайдено.</div>
+        {% endfor %}
+      </div>
+
+      {% include 'components/pagination.html' %}
+    </section>
+  </section>
+</div>
+{% endblock %}

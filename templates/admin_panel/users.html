@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load hub_extras %}
+{% block title %}Користувачі — Volunteer Hub{% endblock %}
+{% block content %}
+<div class="admin-workspace">
+  {% include 'admin_panel/_nav.html' %}
+  <section class="admin-main">
+    <div class="admin-hero">
+      <div>
+        <p class="eyebrow">Права доступу</p>
+        <h1>Користувачі та ролі</h1>
+        <p>Керуйте статусом акаунтів, ролями доступу й базовими профілями учасників платформи.</p>
+      </div>
+      <a class="btn btn-primary" href="{% url 'admin_user_create' %}">Новий користувач</a>
+    </div>
+
+    <div class="admin-toolbar">
+      <form class="filter-panel small">
+        <label><span>Пошук</span><input class="form-control" name="q" value="{{ request.GET.q }}" placeholder="ПІБ або email"></label>
+        <label><span>Роль</span><select class="form-control" name="role"><option value="">Усі ролі</option>{% for value,label in roles %}<option value="{{ value }}" {% if request.GET.role == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+        <label><span>Статус</span><select class="form-control" name="status"><option value="">Усі статуси</option>{% for value,label in statuses %}<option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+        <div class="filter-actions"><button class="btn btn-primary">Фільтрувати</button><a class="btn btn-ghost" href="{% url 'admin_users' %}">Скинути</a></div>
+      </form>
+    </div>
+
+    <div class="table-card">
+      <table>
+        <thead><tr><th>ПІБ</th><th>Email</th><th>Роль</th><th>Статус</th><th>Місто</th><th></th></tr></thead>
+        <tbody>
+          {% for person in users %}
+            <tr>
+              <td><b>{% if person.is_volunteer %}<a href="{% url 'admin_volunteer_detail' person.id %}">{{ person.full_name }}</a>{% else %}{{ person.full_name }}{% endif %}</b></td>
+              <td>{{ person.email }}</td>
+              <td>{{ person.role|role_label }}</td>
+              <td><span class="{{ person.status|status_class }}">{{ person.status|status_label }}</span></td>
+              <td>{{ person.city|default:'—' }}</td>
+              <td>
+                <span class="admin-table-actions">
+                  <a class="btn btn-small" href="{% url 'admin_user_edit' person.id %}">Редагувати</a>
+                  {% if not person.is_platform_admin %}
+                    <form method="post" action="{% url 'admin_user_toggle' person.id %}" data-confirm data-confirm-title="Змінити активність?" data-confirm-message="Статус користувача буде змінено." data-confirm-action="Змінити">
+                      {% csrf_token %}
+                      <button class="btn btn-small" type="submit">Активність</button>
+                    </form>
+                    <form method="post" action="{% url 'admin_user_delete' person.id %}" data-confirm data-confirm-title="Видалити користувача?" data-confirm-message="Користувача та пов’язані з ним персональні записи буде видалено." data-confirm-action="Видалити">
+                      {% csrf_token %}
+                      <button class="btn btn-small btn-danger" type="submit">Видалити</button>
+                    </form>
+                  {% else %}
+                    <span class="muted">Захищено</span>
+                  {% endif %}
+                </span>
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="6">Користувачів не знайдено.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% include 'components/pagination.html' %}
+  </section>
+</div>
+{% endblock %}

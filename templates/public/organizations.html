@@ -1,0 +1,3 @@
+{% extends 'base.html' %}
+{% block title %}Організації — Volunteer Hub{% endblock %}
+{% block content %}<section class="hero compact"><div><p class="eyebrow">Партнери</p><h1>Організації, що запускають волонтерські місії</h1></div></section><div class="cards-grid">{% for org in organizations %}<a class="org-card" href="{% url 'organization_detail' org.slug %}">{% if org.logo %}<img src="{{ org.logo.url }}" alt="{{ org.name }}" loading="eager" decoding="async" fetchpriority="{% if forloop.counter <= 4 %}high{% else %}auto{% endif %}">{% endif %}<h3>{{ org.name }}</h3><p>{{ org.description|truncatechars:140 }}</p><span>{{ org.city }} · {{ org.total }} ініціатив</span></a>{% endfor %}</div>{% include 'components/pagination.html' %}{% endblock %}

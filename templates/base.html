@@ -1,0 +1,78 @@
+{% load static hub_extras %}
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Volunteer Hub{% endblock %}</title>
+  <meta name="description" content="Volunteer Hub — українська платформа координації волонтерських ініціатив, заявок, змін і підтверджених годин.">
+  <meta name="theme-color" content="#111827">
+  <meta property="og:title" content="Volunteer Hub">
+  <meta property="og:description" content="Координація волонтерських ініціатив, участі, годин і сертифікатів.">
+  <meta property="og:image" content="{% static 'images/og-preview.png' %}">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="{% static 'favicon/favicon.ico' %}">
+  <link rel="apple-touch-icon" href="{% static 'favicon/apple-touch-icon.png' %}">
+  <link rel="manifest" href="{% static 'favicon/site.webmanifest' %}">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <script src="{% static 'js/htmx-lite.js' %}" defer></script>
+  <script src="{% static 'js/alpine-lite.js' %}" defer></script>
+  <script src="{% static 'js/app.js' %}" defer></script>
+</head>
+<body style="--auth-photo: url('{{ design_assets.community_care }}'); --default-initiative-photo: url('{{ design_assets.default_initiative }}');">
+  <div class="map-grid"></div>
+  <header class="site-header">
+    <a class="brand" href="{% url 'home' %}">
+      <span class="brand-mark">VH</span>
+      <span><strong>Volunteer Hub</strong><small>Волонтерська координація</small></span>
+    </a>
+    <nav class="nav-links">
+      <a href="{% url 'initiative_catalog' %}">Ініціативи</a>
+      <a href="{% url 'organizations' %}">Організації</a>
+      {% if user.is_authenticated %}
+        {% if not user.is_volunteer %}
+          <a href="{% url 'impact' %}">Вплив</a>
+        {% endif %}
+        <a href="{% url 'dashboard' %}">Панель</a>
+        <a href="{% url 'message_threads' %}">Повідомлення{% if unread_messages_count %}<span class="dot">{{ unread_messages_count }}</span>{% endif %}</a>
+        <a href="{% url 'notifications' %}">Сповіщення{% if unread_notifications_count %}<span class="dot">{{ unread_notifications_count }}</span>{% endif %}</a>
+      {% endif %}
+    </nav>
+    <div class="header-actions">
+      {% if user.is_authenticated %}
+        <a class="user-chip" href="{% url 'profile' %}">{{ user.full_name|default:user.email }}</a>
+        <span class="role-pill">{{ user.role|role_label }}</span>
+        <a class="btn btn-ghost" href="{% url 'logout' %}">Вийти</a>
+      {% else %}
+        <a class="btn btn-ghost" href="{% url 'login' %}">Увійти</a>
+        <a class="btn btn-primary" href="{% url 'register' %}">Долучитися</a>
+      {% endif %}
+    </div>
+  </header>
+
+  {% if messages %}
+    <div class="toast-stack">
+      {% for message in messages %}
+        <div class="toast {{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <main class="page-shell">
+    {% block content %}{% endblock %}
+  </main>
+
+  <div class="confirm-dialog" id="confirm-dialog" aria-hidden="true">
+    <div class="confirm-panel" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+      <h2 id="confirm-title">Підтвердити дію</h2>
+      <p id="confirm-message">Цю дію буде виконано одразу після підтвердження.</p>
+      <div class="confirm-actions">
+        <button class="btn btn-ghost" type="button" data-confirm-cancel>Скасувати</button>
+        <button class="btn btn-danger" type="button" data-confirm-accept>Підтвердити</button>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

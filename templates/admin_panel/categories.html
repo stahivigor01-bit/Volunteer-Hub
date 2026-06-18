@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}Категорії — Volunteer Hub{% endblock %}
+{% block content %}
+<div class="admin-workspace">
+  {% include 'admin_panel/_nav.html' %}
+  <section class="admin-main">
+    <div class="admin-hero">
+      <div>
+        <p class="eyebrow">Категорії впливу</p>
+        <h1>Категорії ініціатив</h1>
+        <p>Напрями впливу для каталогу, аналітики й фільтрації волонтерських місій.</p>
+      </div>
+      <a class="btn btn-primary" href="{% url 'category_create' %}">Нова категорія</a>
+    </div>
+
+    <div class="table-card">
+      <table>
+        <thead><tr><th>Назва</th><th>Опис</th><th>Ініціатив</th><th></th></tr></thead>
+        <tbody>
+          {% for cat in categories %}
+            <tr>
+              <td><b>{{ cat.icon }} {{ cat.name }}</b></td>
+              <td>{{ cat.description|truncatechars:90 }}</td>
+              <td>{{ cat.total }}</td>
+              <td>
+                <span class="admin-table-actions">
+                  <a class="btn btn-small" href="{% url 'category_edit' cat.id %}">Редагувати</a>
+                  <form method="post" action="{% url 'category_delete' cat.id %}" data-confirm data-confirm-title="Видалити категорію?" data-confirm-message="Категорію буде видалено, якщо до неї не прив’язані ініціативи." data-confirm-action="Видалити">
+                    {% csrf_token %}
+                    <button class="btn btn-small btn-danger" type="submit">Видалити</button>
+                  </form>
+                </span>
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="4">Категорії ще не створені.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% include 'components/pagination.html' %}
+  </section>
+</div>
+{% endblock %}

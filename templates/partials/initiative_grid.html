@@ -1,0 +1,37 @@
+{% load hub_extras %}
+<div class="cards-grid initiative-grid">
+  {% for initiative in page_obj.object_list %}
+    <article class="mission-card">
+      <a href="{% url 'initiative_detail' initiative.slug %}" class="image-wrap">
+        {% if initiative.image %}<img src="{{ initiative.image.url }}" alt="{{ initiative.title }}" loading="eager" decoding="async" fetchpriority="{% if forloop.counter <= 4 %}high{% else %}auto{% endif %}">{% else %}<img src="{{ design_assets.default_initiative }}" alt="{{ initiative.title }}" loading="eager" decoding="async" fetchpriority="{% if forloop.counter <= 4 %}high{% else %}auto{% endif %}">{% endif %}
+        <span class="urgency-ribbon {{ initiative.urgency_level }}">{{ initiative.urgency_level|urgency_label }}</span>
+        {% if initiative.user_application_status %}
+          <span class="involvement-ribbon">
+            {% if initiative.user_application_status == 'approved' or initiative.user_application_status == 'attended' %}
+              Ви берете участь
+            {% else %}
+              {{ initiative.user_application_status|status_label }}
+            {% endif %}
+          </span>
+        {% endif %}
+      </a>
+      <div class="card-body">
+        <div class="card-meta"><span>{{ initiative.category.name }}</span><span>{{ initiative.format|format_label }}</span></div>
+        <h3><a href="{% url 'initiative_detail' initiative.slug %}">{{ initiative.title }}</a></h3>
+        <p>{{ initiative.short_description }}</p>
+        <div class="skill-row">
+          {% for skill in initiative.required_skills.all|slice:':3' %}<span class="tag">{{ skill.name }}</span>{% endfor %}
+        </div>
+        <div class="capacity-line">
+          <span>{{ initiative.city }}</span>
+          <strong>{{ initiative.remaining_spots }} місць</strong>
+        </div>
+        <div class="progress"><i style="width: {{ initiative.approved_volunteers_count|percent:initiative.required_volunteers_count }}%"></i></div>
+        {% if initiative.matching %}<span class="badge badge-sky">Збіг навичок {{ initiative.matching }}%</span>{% endif %}
+      </div>
+    </article>
+  {% empty %}
+    <div class="empty-state wide"><div>◇</div><h3>Нічого не знайдено</h3><p>Змініть фільтри або скиньте пошук.</p></div>
+  {% endfor %}
+</div>
+{% include 'components/pagination.html' %}

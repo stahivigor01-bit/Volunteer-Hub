@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load hub_extras %}
+{% block title %}Сповіщення — Volunteer Hub{% endblock %}
+{% block content %}
+<section class="hero compact">
+  <div>
+    <p class="eyebrow">Сповіщення</p>
+    <h1>Центр подій</h1>
+    <p>Оновлення заявок, годин, сертифікатів і системних дій.</p>
+  </div>
+</section>
+
+<section class="panel notification-panel">
+  <form class="filter-panel inbox-filter">
+    <label><span>Пошук</span><input class="form-control" name="q" value="{{ filters.q }}" placeholder="Заголовок або текст сповіщення"></label>
+    <label><span>Тип</span><select class="form-control" name="type"><option value="">Усі типи</option>{% for type in types %}<option value="{{ type }}" {% if filters.type == type %}selected{% endif %}>{{ type|notification_type_label }}</option>{% endfor %}</select></label>
+    <label><span>Стан</span><select class="form-control" name="state"><option value="">Усі стани</option><option value="unread" {% if filters.state == 'unread' %}selected{% endif %}>Непрочитані</option><option value="read" {% if filters.state == 'read' %}selected{% endif %}>Прочитані</option></select></label>
+    <div class="filter-actions"><button class="btn btn-primary">Знайти</button><a class="btn btn-ghost" href="{% url 'notifications' %}">Скинути</a></div>
+  </form>
+
+  <div class="notification-summary">
+    <div><span>Усього</span><b>{{ total_notifications }}</b></div>
+    <div><span>Нових до відкриття сторінки</span><b>{{ unread_count }}</b></div>
+  </div>
+
+  <div class="notification-list">
+    {% for note in notifications %}
+      <article class="notification-row {% if not note.is_read %}is-unread{% endif %}">
+        <div>
+          <span>{{ note.type|notification_type_label }}</span>
+          <h3>{{ note.title }}</h3>
+          <p>{{ note.body }}</p>
+        </div>
+        <time>{{ note.created_at|date:'d.m.Y H:i' }}</time>
+      </article>
+    {% empty %}
+      <div class="empty-state">
+        <h3>Сповіщень не знайдено</h3>
+        <p>Спробуйте змінити пошук або фільтри.</p>
+      </div>
+    {% endfor %}
+  </div>
+  {% include 'components/pagination.html' %}
+</section>
+{% endblock %}

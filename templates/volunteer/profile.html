@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+{% block title %}Профіль — Volunteer Hub{% endblock %}
+{% block content %}
+<section class="hero compact profile-hero">
+  <div>
+    <p class="eyebrow">Профіль</p>
+    {% if user.is_volunteer %}
+      <h1>Профіль волонтера</h1>
+      <p>Особисті дані, навички, доступність і контактна інформація для заявок та сертифікатів.</p>
+    {% elif user.is_coordinator %}
+      <h1>Профіль координатора</h1>
+      <p>Особисті дані для роботи із заявками, змінами, годинами й комунікацією з волонтерами.</p>
+    {% elif user.is_org_manager %}
+      <h1>Профіль менеджера організації</h1>
+      <p>Особисті дані для керування організацією, координаторами та операційними процесами.</p>
+    {% elif user.is_platform_admin %}
+      <h1>Профіль адміністратора</h1>
+      <p>Особисті дані адміністратора платформи та службова контактна інформація.</p>
+    {% else %}
+      <h1>Особисті дані</h1>
+      <p>Інформація використовується в комунікації та внутрішніх процесах платформи.</p>
+    {% endif %}
+  </div>
+  <div class="profile-actions">
+    <span>{{ user.get_role_display }}</span>
+    <div class="quick-actions">
+      {% if user.is_volunteer %}
+        <a class="btn btn-ghost" href="{% url 'volunteer_dashboard' %}">Панель волонтера</a>
+        <a class="btn btn-ghost" href="{% url 'initiative_catalog' %}">Ініціативи</a>
+        <a class="btn btn-ghost" href="{% url 'availability' %}">Навички та доступність</a>
+        <a class="btn btn-ghost" href="{% url 'my_applications' %}">Мої заявки</a>
+        <a class="btn btn-ghost" href="{% url 'my_hours' %}">Мої години</a>
+        <a class="btn btn-ghost" href="{% url 'my_certificates' %}">Сертифікати</a>
+        <a class="btn btn-ghost" href="{% url 'message_threads' %}">Повідомлення</a>
+        <a class="btn btn-ghost" href="{% url 'notifications' %}">Сповіщення</a>
+      {% elif user.is_coordinator %}
+        <a class="btn btn-ghost" href="{% url 'coordinator_dashboard' %}">Панель координатора</a>
+        <a class="btn btn-ghost" href="{% url 'manage_initiatives' %}">Ініціативи</a>
+        <a class="btn btn-ghost" href="{% url 'initiative_create' %}">Нова ініціатива</a>
+        <a class="btn btn-ghost" href="{% url 'review_applications' %}">Заявки</a>
+        <a class="btn btn-ghost" href="{% url 'manage_shifts' %}">Зміни</a>
+        <a class="btn btn-ghost" href="{% url 'shift_create' %}">Нова зміна</a>
+        <a class="btn btn-ghost" href="{% url 'review_hours' %}">Години</a>
+        <a class="btn btn-ghost" href="{% url 'message_threads' %}">Повідомлення</a>
+        <a class="btn btn-ghost" href="{% url 'notifications' %}">Сповіщення</a>
+      {% elif user.is_org_manager %}
+        <a class="btn btn-ghost" href="{% url 'organization_dashboard' %}">Панель організації</a>
+        <a class="btn btn-ghost" href="{% url 'manager_organizations' %}">Організації</a>
+        <a class="btn btn-ghost" href="{% url 'manager_coordinators' %}">Координатори</a>
+        <a class="btn btn-ghost" href="{% url 'manage_initiatives' %}">Ініціативи</a>
+        <a class="btn btn-ghost" href="{% url 'initiative_create' %}">Нова ініціатива</a>
+        <a class="btn btn-ghost" href="{% url 'review_applications' %}">Заявки</a>
+        <a class="btn btn-ghost" href="{% url 'manage_shifts' %}">Зміни</a>
+        <a class="btn btn-ghost" href="{% url 'shift_create' %}">Нова зміна</a>
+        <a class="btn btn-ghost" href="{% url 'review_hours' %}">Години</a>
+        <a class="btn btn-ghost" href="{% url 'message_threads' %}">Повідомлення</a>
+        <a class="btn btn-ghost" href="{% url 'notifications' %}">Сповіщення</a>
+      {% elif user.is_platform_admin %}
+        <a class="btn btn-ghost" href="{% url 'admin_dashboard' %}">Адміністрування</a>
+        <a class="btn btn-ghost" href="{% url 'admin_users' %}">Користувачі</a>
+        <a class="btn btn-ghost" href="{% url 'admin_organizations' %}">Організації</a>
+        <a class="btn btn-ghost" href="{% url 'admin_categories' %}">Категорії</a>
+        <a class="btn btn-ghost" href="{% url 'admin_skills' %}">Навички</a>
+        <a class="btn btn-ghost" href="{% url 'admin_analytics' %}">Аналітика</a>
+        <a class="btn btn-ghost" href="{% url 'message_threads' %}">Повідомлення</a>
+        <a class="btn btn-ghost" href="{% url 'notifications' %}">Сповіщення</a>
+      {% else %}
+        <a class="btn btn-ghost" href="{% url 'dashboard' %}">Панель</a>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+{% if user.is_org_manager %}
+  <section class="profile-role-panel">
+    <div class="profile-role-summary">
+      <div>
+        <p class="eyebrow">Зона менеджера</p>
+        <h2>Організації та команда</h2>
+        <p>Тут відображається управлінський контекст вашої ролі: закріплені організації, координатори й кількість ініціатив.</p>
+      </div>
+      <div class="profile-role-metrics">
+        <span><b>{{ managed_orgs_count }}</b><small>організації</small></span>
+        <span><b>{{ managed_coordinators_count }}</b><small>координаторів</small></span>
+        <span><b>{{ managed_initiatives_count }}</b><small>ініціатив</small></span>
+      </div>
+    </div>
+    <div class="manager-org-grid compact">
+      {% for org in managed_orgs %}
+        <article class="manager-org-card">
+          <div class="capacity-line"><h3>{{ org.name }}</h3><span>{{ org.city|default:'—' }}</span></div>
+          <div class="status-line"><span>Ініціативи</span><b>{{ org.initiatives_total }}</b></div>
+          <div class="status-line"><span>Координатори</span><b>{{ org.coordinators_total }}</b></div>
+          <div class="admin-table-actions">
+            <a class="btn btn-small" href="{% url 'manager_organization_edit' org.id %}">Редагувати</a>
+            <a class="btn btn-small btn-ghost" href="{% url 'organization_detail' org.slug %}">Публічна сторінка</a>
+          </div>
+        </article>
+      {% empty %}
+        <div class="manager-empty wide">За профілем ще не закріплено організації.</div>
+      {% endfor %}
+    </div>
+  </section>
+{% elif user.is_coordinator %}
+  <section class="profile-role-panel">
+    <div class="profile-role-summary">
+      <div>
+        <p class="eyebrow">Зона координатора</p>
+        <h2>Закріплені організації</h2>
+        <p>Координатор працює з заявками, змінами, годинами та комунікацією в межах цих організацій.</p>
+      </div>
+    </div>
+    <div class="manager-org-grid compact">
+      {% for org in coordinated_orgs %}
+        <article class="manager-org-card">
+          <div class="capacity-line"><h3>{{ org.name }}</h3><span>{{ org.city|default:'—' }}</span></div>
+          <div class="status-line"><span>Ініціативи</span><b>{{ org.initiatives_total }}</b></div>
+          <a class="btn btn-small btn-ghost" href="{% url 'organization_detail' org.slug %}">Публічна сторінка</a>
+        </article>
+      {% empty %}
+        <div class="manager-empty wide">Координатора ще не закріплено за організацією.</div>
+      {% endfor %}
+    </div>
+  </section>
+{% endif %}
+
+<section class="panel form-panel">
+  <form method="post" enctype="multipart/form-data" class="smart-form">
+    {% csrf_token %}
+    {% include 'components/form_errors.html' %}
+    {% for field in form %}
+      <label class="field-block {% if field.errors %}has-error{% endif %} {% if field.field.widget.input_type == 'checkbox' %}checkbox-field danger-checkbox{% endif %}">
+        <span>{{ field.label }}</span>
+        {{ field }}
+      </label>
+    {% endfor %}
+    <button class="btn btn-primary">Оновити профіль</button>
+  </form>
+</section>
+{% endblock %}

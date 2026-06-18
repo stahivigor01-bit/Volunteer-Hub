@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% load hub_extras %}
+{% block title %}Заявки — Volunteer Hub{% endblock %}
+{% block content %}
+{% if user.is_org_manager %}<div class="manager-workspace">{% include 'manager/_nav.html' %}<section class="manager-main">{% endif %}
+<section class="hero compact">
+  <div>
+    <p class="eyebrow">Черга заявок</p>
+    <h1>Розгляд заявок</h1>
+  </div>
+</section>
+
+<section class="panel">
+  <form class="inline-filter" method="get">
+    <input class="form-control" name="q" value="{{ q }}" placeholder="Пошук за волонтером, ініціативою або організацією">
+    <select class="form-control" name="organization">
+      <option value="">Усі організації</option>
+      {% for org in organizations %}
+        <option value="{{ org.id }}" {% if organization == org.id|stringformat:'s' %}selected{% endif %}>{{ org.name }}</option>
+      {% endfor %}
+    </select>
+    <select class="form-control" name="status">
+      <option value="">Усі статуси</option>
+      {% for value, label in application_statuses %}
+        <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <button class="btn btn-primary" type="submit">Знайти</button>
+    <a class="btn btn-ghost" href="{% url 'review_applications' %}">Скинути</a>
+  </form>
+  <div class="active-filters">
+    <span class="filter-chip">У доступі: {{ total_count }}</span>
+    <span class="filter-chip">Знайдено: {{ result_count }}</span>
+  </div>
+
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>Волонтер</th>
+          <th>Ініціатива</th>
+          <th>Зміна</th>
+          <th>Статус</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for app in applications %}
+          <tr>
+            <td>{{ app.volunteer.full_name }}</td>
+            <td>{{ app.initiative.title }}<br><small>{{ app.initiative.organization.name }}</small></td>
+            <td>{{ app.shift|default:'—' }}</td>
+            <td><span class="{{ app.status|status_class }}">{{ app.status|status_label }}</span></td>
+            <td><a class="btn btn-small" href="{% url 'application_decision' app.id %}">Рішення</a></td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5">Заявок за цими фільтрами немає.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% include 'components/pagination.html' %}
+</section>
+{% if user.is_org_manager %}</section></div>{% endif %}
+{% endblock %}

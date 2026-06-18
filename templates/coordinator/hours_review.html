@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load hub_extras %}
+{% block title %}Перевірка годин — Volunteer Hub{% endblock %}
+{% block content %}
+{% if user.is_org_manager %}<div class="manager-workspace">{% include 'manager/_nav.html' %}<section class="manager-main">{% endif %}
+<section class="hero compact">
+  <div>
+    <p class="eyebrow">Перевірка годин</p>
+    <h1>Години на підтвердження</h1>
+    <p>Записи потрапляють сюди після подання волонтером годин за підтвердженою участю.</p>
+  </div>
+</section>
+
+<section class="panel">
+  <form class="inline-filter hours-filter" method="get">
+    <input class="form-control" name="q" value="{{ q }}" placeholder="Пошук за волонтером, ініціативою, організацією або зміною">
+    <select class="form-control" name="organization">
+      <option value="">Усі організації</option>
+      {% for org in organizations %}
+        <option value="{{ org.id }}" {% if organization == org.id|stringformat:'s' %}selected{% endif %}>{{ org.name }}</option>
+      {% endfor %}
+    </select>
+    <select class="form-control" name="status">
+      <option value="">Усі статуси</option>
+      {% for value, label in hour_statuses %}
+        <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <label class="filter-date">
+      <span>Від</span>
+      <input class="form-control" type="date" name="date_from" value="{{ date_from }}">
+    </label>
+    <label class="filter-date">
+      <span>До</span>
+      <input class="form-control" type="date" name="date_to" value="{{ date_to }}">
+    </label>
+    <button class="btn btn-primary" type="submit">Знайти</button>
+    <a class="btn btn-ghost" href="{% url 'review_hours' %}">Скинути</a>
+  </form>
+  <div class="active-filters">
+    <span class="filter-chip">У доступі: {{ total_count }}</span>
+    <span class="filter-chip">Знайдено: {{ result_count }}</span>
+  </div>
+
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>Волонтер</th>
+          <th>Ініціатива</th>
+          <th>Зміна</th>
+          <th>Години</th>
+          <th>Дата подання</th>
+          <th>Статус</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for hour in hours %}
+          <tr>
+            <td>{{ hour.volunteer.full_name }}<br><small>{{ hour.volunteer.email }}</small></td>
+            <td>{{ hour.initiative.title }}<br><small>{{ hour.initiative.organization.name }}</small></td>
+            <td>{% if hour.shift %}{{ hour.shift.title }}{% else %}Загальна участь{% endif %}</td>
+            <td><b>{{ hour.hours }}</b></td>
+            <td>{{ hour.submitted_at|date:'d.m.Y H:i' }}</td>
+            <td><span class="{{ hour.status|status_class }}">{{ hour.get_status_display }}</span></td>
+            <td><a class="btn btn-small" href="{% url 'hour_decision' hour.id %}">Перевірити</a></td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="7">Записів годин за цими фільтрами немає.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% include 'components/pagination.html' %}
+</section>
+{% if user.is_org_manager %}</section></div>{% endif %}
+{% endblock %}

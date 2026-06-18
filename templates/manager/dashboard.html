@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% load hub_extras %}
+{% block title %}Панель організації — Volunteer Hub{% endblock %}
+{% block content %}
+<div class="manager-workspace">
+  {% include 'manager/_nav.html' %}
+  <section class="manager-main">
+    <div class="manager-hero">
+      <div>
+        <p class="eyebrow">Менеджер організації</p>
+        <h1>Контроль організацій і команди</h1>
+        <p>Стратегічний огляд профілів організацій, координаторів, заявок, змін і підтверджених годин у вашій зоні відповідальності.</p>
+      </div>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="{% url 'manager_organizations' %}">Керувати організаціями</a>
+        <a class="btn btn-ghost" href="{% url 'manager_coordinators' %}">Команда координаторів</a>
+      </div>
+    </div>
+
+    <div class="manager-kpis">
+      <a class="manager-kpi" href="{% url 'manager_organizations' %}"><span>Організації</span><b>{{ organizations_count }}</b><small>Профілі під вашим керуванням</small></a>
+      <a class="manager-kpi accent" href="{% url 'manager_coordinators' %}"><span>Координатори</span><b>{{ coordinators_count }}</b><small>Операційна команда</small></a>
+      <a class="manager-kpi" href="{% url 'manage_initiatives' %}"><span>Активні ініціативи</span><b>{{ active_initiatives }}</b><small>{{ initiatives_count }} загалом</small></a>
+      <a class="manager-kpi warning" href="{% url 'review_applications' %}"><span>На розгляді</span><b>{{ pending_apps }}</b><small>{{ pending_hours }} записів годин очікують</small></a>
+      <a class="manager-kpi" href="{% url 'manage_shifts' %}"><span>Відкриті зміни</span><b>{{ open_shifts }}</b><small>Майбутні зміни з набором</small></a>
+      <a class="manager-kpi" href="{% url 'review_hours' %}"><span>Підтверджені години</span><b>{{ approved_hours }}</b><small>Зарахований внесок команди</small></a>
+    </div>
+
+    <section class="manager-grid">
+      <article class="manager-card span-2">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Профілі</p>
+            <h2>Організації</h2>
+          </div>
+          <a class="btn btn-small" href="{% url 'manager_organizations' %}">Усі організації</a>
+        </div>
+        <div class="manager-org-list">
+          {% for org in org_cards %}
+            <a class="manager-org-row" href="{% url 'manager_organization_edit' org.id %}">
+              {% if org.logo %}<img src="{{ org.logo.url }}" alt="{{ org.name }}" loading="eager" decoding="async">{% endif %}
+              <span class="row-main">
+                <b>{{ org.name }}</b>
+                <small>{{ org.city }} · {{ org.initiatives_total }} ініціатив · {{ org.coordinators_total }} координаторів</small>
+              </span>
+              <span class="row-meta">
+                <span class="{{ org.status|status_class }}">{{ org.status|status_label }}</span>
+                <small>{{ org.pending_applications_total }} заявок</small>
+              </span>
+            </a>
+          {% empty %}
+            <div class="manager-empty">За вами ще не закріплено організацій.</div>
+          {% endfor %}
+        </div>
+      </article>
+
+      <article class="manager-card">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Команда</p>
+            <h2>Координатори</h2>
+          </div>
+          <a class="btn btn-small" href="{% url 'manager_coordinators' %}">Детально</a>
+        </div>
+        <div class="operation-list">
+          {% for person in coordinators %}
+            <div class="manager-person-row">
+              <b>{{ person.full_name }}</b>
+              <span>{{ person.email }}</span>
+              <small>{{ person.city|default:'Місто не вказано' }}</small>
+            </div>
+          {% empty %}
+            <div class="manager-empty">Координаторів ще не призначено.</div>
+          {% endfor %}
+        </div>
+      </article>
+    </section>
+
+    <section class="manager-board">
+      <div class="panel operations-panel">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Заявки</p>
+            <h2>Останні звернення</h2>
+          </div>
+          <a class="btn btn-small" href="{% url 'review_applications' %}">Усі заявки</a>
+        </div>
+        <div class="operation-list">
+          {% for app in recent_applications %}
+            <a class="operation-row" href="{% url 'application_decision' app.id %}">
+              <span class="row-main"><b>{{ app.volunteer.full_name }}</b><small>{{ app.initiative.title }}</small></span>
+              <span class="row-meta"><span class="{{ app.status|status_class }}">{{ app.status|status_label }}</span><small>{{ app.created_at|date:'d.m.Y H:i' }}</small></span>
+            </a>
+          {% empty %}
+            <div class="manager-empty">Нових заявок немає.</div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="panel operations-panel">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Розклад</p>
+            <h2>Найближчі зміни</h2>
+          </div>
+          <a class="btn btn-small" href="{% url 'manage_shifts' %}">Усі зміни</a>
+        </div>
+        <div class="operation-list">
+          {% for shift in upcoming_shifts %}
+            <a class="operation-row" href="{% url 'shift_edit' shift.id %}">
+              <span class="row-main"><b>{{ shift.title }}</b><small>{{ shift.initiative.title }}</small></span>
+              <span class="row-meta"><b>{{ shift.shift_date|date:'d.m.Y' }} · {{ shift.start_time|time:'H:i' }}</b><small>{{ shift.approved_count }}/{{ shift.max_volunteers }} місць</small></span>
+            </a>
+          {% empty %}
+            <div class="manager-empty">Найближчих змін немає.</div>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <section class="panel operations-panel">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Ризики</p>
+          <h2>Термінові ініціативи</h2>
+        </div>
+        <a class="btn btn-small" href="{% url 'manage_initiatives' %}">Керувати</a>
+      </div>
+      <div class="operation-list">
+        {% for item in urgent %}
+          <a class="operation-row" href="{% url 'initiative_detail' item.slug %}">
+            <span class="row-main"><b>{{ item.title }}</b><small>{{ item.organization.name }} · {{ item.city }}</small></span>
+            <span class="row-meta"><span class="{{ item.urgency_level|urgency_class }}">{{ item.urgency_level|urgency_label }}</span><small>{{ item.remaining_spots }} місць</small></span>
+          </a>
+        {% empty %}
+          <div class="manager-empty">Термінових ініціатив немає.</div>
+        {% endfor %}
+      </div>
+    </section>
+  </section>
+</div>
+{% endblock %}

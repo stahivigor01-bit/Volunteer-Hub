@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load hub_extras %}
+{% block title %}{{ person.full_name }} — Volunteer Hub{% endblock %}
+{% block content %}
+<div class="admin-workspace">
+  {% include 'admin_panel/_nav.html' %}
+  <section class="admin-main">
+    <div class="admin-hero">
+      <div>
+        <p class="eyebrow">Профіль волонтера</p>
+        <h1>{{ person.full_name }}</h1>
+        <p>{{ person.email }}{% if person.phone %} · {{ person.phone }}{% endif %}{% if person.city %} · {{ person.city }}{% endif %}</p>
+      </div>
+      <a class="btn btn-ghost" href="{% url 'admin_users' %}">До користувачів</a>
+    </div>
+
+    <div class="metrics-grid">
+      <div class="metric-card"><b>{{ total_hours }}</b><span>підтверджених годин</span></div>
+      <div class="metric-card"><b>{{ person.applications.count }}</b><span>заявок</span></div>
+      <div class="metric-card"><b>{{ person.certificates.count }}</b><span>сертифікатів</span></div>
+      <div class="metric-card"><b>{{ person.volunteer_threads.count }}</b><span>діалогів</span></div>
+    </div>
+
+    <section class="two-column">
+      <div class="panel">
+        <h2>Останні заявки</h2>
+        {% for app in applications %}
+          <div class="list-row"><span>{{ app.initiative.title }}</span><b class="{{ app.status|status_class }}">{{ app.status|status_label }}</b></div>
+        {% empty %}
+          <p class="muted">Заявок ще немає.</p>
+        {% endfor %}
+      </div>
+      <div class="panel">
+        <h2>Підтвердження годин</h2>
+        {% for hour in hours %}
+          <div class="list-row"><span>{{ hour.initiative.title }}</span><b>{{ hour.hours }} год.</b></div>
+        {% empty %}
+          <p class="muted">Години ще не подавались.</p>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="two-column">
+      <div class="panel">
+        <h2>Сертифікати</h2>
+        {% for cert in certificates %}
+          <a class="list-row linked-row" href="{% url 'certificate_detail' cert.id %}"><span>{{ cert.initiative.title }}</span><b>{{ cert.approved_hours }} год.</b></a>
+        {% empty %}
+          <p class="muted">Сертифікатів ще немає.</p>
+        {% endfor %}
+      </div>
+      <div class="panel">
+        <h2>Комунікація</h2>
+        {% for thread in threads %}
+          <a class="list-row linked-row" href="{% url 'message_thread' thread.id %}"><span>{{ thread.subject }}</span><b class="{{ thread.status|status_class }}">{{ thread.status|status_label }}</b></a>
+        {% empty %}
+          <p class="muted">Діалогів ще немає.</p>
+        {% endfor %}
+      </div>
+    </section>
+  </section>
+</div>
+{% endblock %}

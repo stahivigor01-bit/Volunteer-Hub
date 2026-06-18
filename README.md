@@ -134,6 +134,13 @@ python manage.py measure_images / /initiatives/ /organizations/ --fetch --limit 
 python manage.py warm_cloudinary_images --limit 220 --workers 6
 ```
 
+Після ручного масового видалення ініціатив або організацій можна перевірити й прибрати записи, що втратили зв'язки:
+
+```bash
+python manage.py cleanup_orphaned_records --dry-run
+python manage.py cleanup_orphaned_records
+```
+
 Перенести вже наявні локальні файли з `media/` у Cloudinary:
 
 ```bash

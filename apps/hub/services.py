@@ -15,9 +15,36 @@ def log_action(actor, action, entity, details=None):
     )
 
 
-def notify(user, type_, title, body):
+def notification_relations(related=None, **relations):
+    if related is None:
+        return relations
+    if isinstance(related, Application):
+        relations.setdefault('application', related)
+        relations.setdefault('initiative', related.initiative)
+    elif isinstance(related, VolunteerHour):
+        relations.setdefault('volunteer_hour', related)
+        relations.setdefault('initiative', related.initiative)
+    elif isinstance(related, MessageThread):
+        relations.setdefault('message_thread', related)
+        relations.setdefault('application', related.application)
+        relations.setdefault('initiative', related.initiative)
+    elif isinstance(related, Certificate):
+        relations.setdefault('certificate', related)
+        relations.setdefault('initiative', related.initiative)
+    elif isinstance(related, Initiative):
+        relations.setdefault('initiative', related)
+    return relations
+
+
+def notify(user, type_, title, body, related=None, **relations):
     if user:
-        Notification.objects.create(user=user, type=type_, title=title, body=body)
+        Notification.objects.create(
+            user=user,
+            type=type_,
+            title=title,
+            body=body,
+            **notification_relations(related, **relations),
+        )
         cache.delete(f'header-stats:{user.id}')
 
 
@@ -80,7 +107,7 @@ def issue_certificate_for_hours(hour, issuer):
         approved_hours=hour.hours,
         certificate_number=number,
     )
-    notify(hour.volunteer, 'certificate', 'Сертифікат видано', f'Сертифікат за ініціативу «{hour.initiative.title}» готовий до перегляду.')
+    notify(hour.volunteer, 'certificate', 'Сертифікат видано', f'Сертифікат за ініціативу «{hour.initiative.title}» готовий до перегляду.', related=cert)
     log_action(issuer, 'issued_certificate', cert, {'hours': str(hour.hours)})
     return cert
 

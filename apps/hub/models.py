@@ -341,8 +341,8 @@ class MessageThread(models.Model):
 
     volunteer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='volunteer_threads')
     coordinator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='coordinator_threads')
-    initiative = models.ForeignKey(Initiative, on_delete=models.SET_NULL, null=True, blank=True)
-    application = models.ForeignKey(Application, on_delete=models.SET_NULL, null=True, blank=True)
+    initiative = models.ForeignKey(Initiative, on_delete=models.CASCADE, null=True, blank=True, related_name='message_threads')
+    application = models.ForeignKey(Application, on_delete=models.CASCADE, null=True, blank=True, related_name='message_threads')
     subject = models.CharField('Тема', max_length=180)
     status = models.CharField('Статус', max_length=32, choices=Statuses.choices, default=Statuses.OPEN)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -377,6 +377,11 @@ class Message(models.Model):
 
 class Notification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    initiative = models.ForeignKey(Initiative, on_delete=models.CASCADE, null=True, blank=True, related_name='notifications')
+    application = models.ForeignKey(Application, on_delete=models.CASCADE, null=True, blank=True, related_name='notifications')
+    volunteer_hour = models.ForeignKey(VolunteerHour, on_delete=models.CASCADE, null=True, blank=True, related_name='notifications')
+    message_thread = models.ForeignKey(MessageThread, on_delete=models.CASCADE, null=True, blank=True, related_name='notifications')
+    certificate = models.ForeignKey(Certificate, on_delete=models.CASCADE, null=True, blank=True, related_name='notifications')
     type = models.CharField('Тип', max_length=60)
     title = models.CharField('Заголовок', max_length=180)
     body = models.TextField('Текст')
@@ -388,6 +393,11 @@ class Notification(models.Model):
         indexes = [
             models.Index(fields=['user', 'is_read', '-created_at']),
             models.Index(fields=['user', 'type', '-created_at']),
+            models.Index(fields=['initiative', '-created_at']),
+            models.Index(fields=['application', '-created_at']),
+            models.Index(fields=['volunteer_hour', '-created_at']),
+            models.Index(fields=['message_thread', '-created_at']),
+            models.Index(fields=['certificate', '-created_at']),
         ]
 
 

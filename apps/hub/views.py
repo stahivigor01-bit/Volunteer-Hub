@@ -273,7 +273,14 @@ def apply_initiative(request, slug):
         )
         Message.objects.create(thread=thread, sender=request.user, message_text=f'Подав заявку. Мотивація: {app.motivation_text}')
         for coordinator in initiative.organization.coordinators.all():
-            notify(coordinator, 'application', 'Нова заявка', f'{request.user.full_name} подав заявку на «{initiative.title}».')
+            notify(
+                coordinator,
+                'application',
+                'Нова заявка',
+                f'{request.user.full_name} подав заявку на «{initiative.title}».',
+                related=app,
+                message_thread=thread,
+            )
         log_action(request.user, 'submitted_application', app)
         messages.success(request, 'Заявку подано. Координатор перегляне її найближчим часом.')
         return redirect('my_applications')
@@ -338,7 +345,7 @@ def my_hours(request):
         if hour.initiative.organization.manager:
             managers.append(hour.initiative.organization.manager)
         for person in managers:
-            notify(person, 'hours', 'Години очікують перевірки', f'{request.user.full_name} подав {hour.hours} год. за «{hour.initiative.title}».')
+            notify(person, 'hours', 'Години очікують перевірки', f'{request.user.full_name} подав {hour.hours} год. за «{hour.initiative.title}».', related=hour)
         messages.success(request, 'Години подано на підтвердження.')
         return redirect('my_hours')
     hours = request.user.hours.select_related('initiative', 'shift').order_by('-submitted_at')
@@ -454,7 +461,7 @@ def message_thread(request, pk):
         cache.delete(f'header-stats:{request.user.id}')
         if recipient:
             cache.delete(f'header-stats:{recipient.id}')
-        notify(recipient, 'message', 'Нове повідомлення', f'Нова відповідь у темі «{thread.subject}».')
+        notify(recipient, 'message', 'Нове повідомлення', f'Нова відповідь у темі «{thread.subject}».', related=thread)
         return redirect('message_thread', pk=pk)
     return render(request, 'messages/thread.html', {'thread': thread, 'form': form})
 
@@ -785,7 +792,7 @@ def application_decision(request, pk):
         app.rejection_reason = form.cleaned_data.get('rejection_reason', '') if new_status == Application.Statuses.REJECTED else ''
         app.save(update_fields=['status', 'coordinator_comment', 'rejection_reason', 'updated_at'])
         refresh_counts(app)
-        notify(app.volunteer, 'application_status', 'Статус заявки змінено', f'Заявка на «{app.initiative.title}»: {app.get_status_display()}.')
+        notify(app.volunteer, 'application_status', 'Статус заявки змінено', f'Заявка на «{app.initiative.title}»: {app.get_status_display()}.', related=app)
         log_action(request.user, 'changed_application_status', app, {'old': old, 'new': new_status})
         messages.success(request, 'Рішення збережено.')
         return redirect('review_applications')
@@ -955,7 +962,7 @@ def hour_decision(request, pk):
         hour.save(update_fields=['status', 'review_comment', 'reviewed_by', 'reviewed_at'])
         if hour.status == VolunteerHour.Statuses.APPROVED:
             issue_certificate_for_hours(hour, request.user)
-        notify(hour.volunteer, 'hours_status', 'Години перевірено', f'Запис за «{hour.initiative.title}»: {hour.get_status_display()}.')
+        notify(hour.volunteer, 'hours_status', 'Години перевірено', f'Запис за «{hour.initiative.title}»: {hour.get_status_display()}.', related=hour)
         log_action(request.user, 'changed_hour_status', hour, {'old': old, 'new': hour.status})
         messages.success(request, 'Рішення щодо годин збережено.')
         return redirect('review_hours')

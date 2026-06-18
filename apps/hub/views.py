@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
+from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.db.models.deletion import ProtectedError
 from django.db.models import Count, Q, Sum
@@ -439,6 +440,7 @@ def message_thread(request, pk):
     if not allowed:
         return HttpResponseForbidden('Недостатньо прав доступу.')
     thread.messages.exclude(sender=request.user).update(is_read=True)
+    cache.delete(f'header-stats:{request.user.id}')
     form = MessageForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
         msg = form.save(commit=False)
@@ -449,6 +451,9 @@ def message_thread(request, pk):
         thread.status = MessageThread.Statuses.WAITING_FOR_COORDINATOR if request.user.is_volunteer else MessageThread.Statuses.WAITING_FOR_VOLUNTEER
         thread.save(update_fields=['updated_at', 'status'])
         recipient = thread.coordinator if request.user.is_volunteer else thread.volunteer
+        cache.delete(f'header-stats:{request.user.id}')
+        if recipient:
+            cache.delete(f'header-stats:{recipient.id}')
         notify(recipient, 'message', 'Нове повідомлення', f'Нова відповідь у темі «{thread.subject}».')
         return redirect('message_thread', pk=pk)
     return render(request, 'messages/thread.html', {'thread': thread, 'form': form})
@@ -1169,6 +1174,7 @@ def notifications(request):
         notifications_qs = notifications_qs.filter(is_read=True)
     page_obj = paginate(request, notifications_qs, 12)
     request.user.notifications.filter(is_read=False).update(is_read=True)
+    cache.delete(f'header-stats:{request.user.id}')
     return render(request, 'notifications/list.html', {
         'notifications': page_obj.object_list,
         'page_obj': page_obj,

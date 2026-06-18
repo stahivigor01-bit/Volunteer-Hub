@@ -160,6 +160,11 @@ class Initiative(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['status', '-created_at']),
+            models.Index(fields=['organization', 'status', '-created_at']),
+            models.Index(fields=['city', 'status']),
+        ]
 
     def __str__(self):
         return self.title
@@ -222,6 +227,10 @@ class Shift(models.Model):
 
     class Meta:
         ordering = ['shift_date', 'start_time']
+        indexes = [
+            models.Index(fields=['initiative', 'status', 'shift_date']),
+            models.Index(fields=['status', 'shift_date', 'start_time']),
+        ]
 
     def __str__(self):
         return f'{self.title} — {self.shift_date}'
@@ -266,6 +275,11 @@ class Application(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['initiative', 'status', '-created_at']),
+            models.Index(fields=['volunteer', 'status', '-created_at']),
+            models.Index(fields=['shift', 'status']),
+        ]
 
     def __str__(self):
         return f'{self.volunteer} → {self.initiative}'
@@ -292,6 +306,11 @@ class VolunteerHour(models.Model):
 
     class Meta:
         ordering = ['-submitted_at']
+        indexes = [
+            models.Index(fields=['initiative', 'status', '-submitted_at']),
+            models.Index(fields=['volunteer', 'status', '-submitted_at']),
+            models.Index(fields=['shift', 'status']),
+        ]
 
 
 class Certificate(models.Model):
@@ -331,6 +350,11 @@ class MessageThread(models.Model):
 
     class Meta:
         ordering = ['-updated_at']
+        indexes = [
+            models.Index(fields=['volunteer', '-updated_at']),
+            models.Index(fields=['coordinator', '-updated_at']),
+            models.Index(fields=['status', '-updated_at']),
+        ]
 
     def __str__(self):
         return self.subject
@@ -345,6 +369,10 @@ class Message(models.Model):
 
     class Meta:
         ordering = ['created_at']
+        indexes = [
+            models.Index(fields=['thread', 'is_read', 'created_at']),
+            models.Index(fields=['is_read', 'sender']),
+        ]
 
 
 class Notification(models.Model):
@@ -357,6 +385,10 @@ class Notification(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', 'is_read', '-created_at']),
+            models.Index(fields=['user', 'type', '-created_at']),
+        ]
 
 
 class AuditLog(models.Model):

@@ -69,7 +69,7 @@ if not DATABASE_URL:
 DATABASES = {
     'default': dj_database_url.config(
         default=DATABASE_URL,
-        conn_max_age=60,
+        conn_max_age=int(os.getenv('DB_CONN_MAX_AGE', '600')),
         conn_health_checks=True,
         ssl_require='sslmode=require' in DATABASE_URL,
     )

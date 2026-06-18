@@ -54,10 +54,9 @@ class NeonWakeMiddlewareTests(SimpleTestCase):
         from config.middleware import NeonWakeMiddleware
 
         request = RequestFactory().get('/')
-        middleware = NeonWakeMiddleware(lambda request: None)
+        middleware = NeonWakeMiddleware(lambda request: (_ for _ in ()).throw(OperationalError('sleeping')))
 
-        with patch('config.middleware.connections') as connections, patch('config.middleware.requests.post') as post:
-            connections.__getitem__.return_value.ensure_connection.side_effect = OperationalError('sleeping')
+        with patch('config.middleware.requests.post') as post:
             post.return_value = Mock(status_code=200)
 
             response = middleware(request)

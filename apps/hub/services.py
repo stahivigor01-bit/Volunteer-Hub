@@ -18,6 +18,7 @@ def log_action(actor, action, entity, details=None):
 def notify(user, type_, title, body):
     if user:
         Notification.objects.create(user=user, type=type_, title=title, body=body)
+        cache.delete(f'header-stats:{user.id}')
 
 
 def user_can_manage_initiative(user, initiative):

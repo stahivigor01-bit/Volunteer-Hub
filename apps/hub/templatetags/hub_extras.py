@@ -1,5 +1,4 @@
 from django import template
-
 register = template.Library()
 
 ROLE_LABELS = {
@@ -84,3 +83,36 @@ def percent(value, total):
         return min(int(float(value) / total * 100), 100)
     except Exception:
         return 0
+
+
+def cloudinary_transform(value, transformation):
+    if not value:
+        return ''
+    url = str(value)
+    marker = '/image/upload/'
+    if marker not in url or not transformation:
+        return url
+    prefix, rest = url.split(marker, 1)
+    if rest.startswith(('f_auto,', 'q_auto,', 'c_fill,', 'c_fit,', 'c_limit,')):
+        return url
+    return f'{prefix}{marker}{str(transformation).strip("/")}/{rest}'
+
+
+@register.filter
+def image_card(value):
+    return cloudinary_transform(value, 'f_auto,q_auto,c_fill,g_auto,w_640,h_380,dpr_auto')
+
+
+@register.filter
+def image_hero(value):
+    return cloudinary_transform(value, 'f_auto,q_auto,c_fill,g_auto,w_1440,h_760,dpr_auto')
+
+
+@register.filter
+def image_logo(value):
+    return cloudinary_transform(value, 'f_auto,q_auto,c_fill,g_auto,w_520,h_320,dpr_auto')
+
+
+@register.filter
+def image_avatar(value):
+    return cloudinary_transform(value, 'f_auto,q_auto,c_fill,g_face,w_180,h_180,dpr_auto')

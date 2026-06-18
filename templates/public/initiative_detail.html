@@ -3,7 +3,7 @@
 {% block title %}{{ initiative.title }} — Volunteer Hub{% endblock %}
 {% block content %}
 <section class="detail-hero">
-  <div class="detail-image">{% if initiative.image %}<img src="{{ initiative.image.url }}" alt="{{ initiative.title }}" loading="eager" decoding="async" fetchpriority="high">{% else %}<img src="{{ design_assets.default_initiative }}" alt="{{ initiative.title }}" loading="eager" decoding="async" fetchpriority="high">{% endif %}</div>
+  <div class="detail-image">{% if initiative.image %}<img src="{{ initiative.image.url|image_hero }}" alt="{{ initiative.title }}" loading="eager" decoding="async" fetchpriority="high" width="1440" height="760">{% else %}<img src="{{ design_assets.default_initiative|image_hero }}" alt="{{ initiative.title }}" loading="eager" decoding="async" fetchpriority="high" width="1440" height="760">{% endif %}</div>
   <div class="detail-copy">
     <p class="eyebrow">{{ initiative.category.name }} · {{ initiative.format|format_label }}</p>
     <h1>{{ initiative.title }}</h1>

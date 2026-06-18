@@ -38,7 +38,7 @@
         <div class="manager-org-list">
           {% for org in org_cards %}
             <a class="manager-org-row" href="{% url 'manager_organization_edit' org.id %}">
-              {% if org.logo %}<img src="{{ org.logo.url }}" alt="{{ org.name }}" loading="eager" decoding="async">{% endif %}
+              {% if org.logo %}<img src="{{ org.logo.url|image_logo }}" alt="{{ org.name }}" loading="{% if forloop.counter <= 3 %}eager{% else %}lazy{% endif %}" decoding="async" fetchpriority="{% if forloop.counter <= 3 %}high{% else %}low{% endif %}" width="520" height="320">{% endif %}
               <span class="row-main">
                 <b>{{ org.name }}</b>
                 <small>{{ org.city }} · {{ org.initiatives_total }} ініціатив · {{ org.coordinators_total }} координаторів</small>

@@ -42,7 +42,7 @@
         {% for org in organizations %}
           <article class="manager-org-card">
             {% if org.logo %}
-              <img class="manager-org-photo" src="{{ org.logo.url }}" alt="{{ org.name }}" loading="eager" decoding="async">
+              <img class="manager-org-photo" src="{{ org.logo.url|image_logo }}" alt="{{ org.name }}" loading="{% if forloop.counter <= 4 %}eager{% else %}lazy{% endif %}" decoding="async" fetchpriority="{% if forloop.counter <= 4 %}high{% else %}low{% endif %}" width="520" height="320">
             {% endif %}
             <div class="capacity-line">
               <h3>{{ org.name }}</h3>

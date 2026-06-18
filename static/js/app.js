@@ -339,8 +339,9 @@
   function hintImages(root){
     root.querySelectorAll('img[src]').forEach(function(img,index){
       if(!img.hasAttribute('decoding'))img.setAttribute('decoding','async');
-      if(!img.hasAttribute('loading'))img.setAttribute('loading','eager');
-      if(index<4 && !img.hasAttribute('fetchpriority'))img.setAttribute('fetchpriority','high');
+      if(!img.hasAttribute('loading'))img.setAttribute('loading',index<2?'eager':'lazy');
+      if(index<2 && !img.hasAttribute('fetchpriority'))img.setAttribute('fetchpriority','high');
+      if(index>=2 && !img.hasAttribute('fetchpriority'))img.setAttribute('fetchpriority','low');
       if(img.complete && img.naturalWidth>0){
         img.dataset.imageReady='1';
       }else{
@@ -355,7 +356,6 @@
     if(imageCache.has(url))return imageCache.get(url);
     const img=new Image();
     img.decoding='async';
-    img.loading='eager';
     const promise=new Promise(function(resolve){
       let settled=false;
       const finish=function(){
@@ -414,7 +414,7 @@
         return response.text();
       })
       .then(function(html){
-        if(html)return primeHtmlImages(html,{limit:18});
+        if(html)return primeHtmlImages(html,{limit:4});
       })
       .catch(function(){});
     pageImageCache.set(key,promise);
@@ -422,9 +422,9 @@
   }
 
   function scheduleImageWarmup(root){
-    primeImages(root,{limit:18});
+    hintImages(root);
     const idle=window.requestIdleCallback || function(callback){return setTimeout(callback,120);};
-    idle(function(){primeImages(root);});
+    idle(function(){primeImages(root,{limit:4});});
   }
 
   function targetElement(target){
@@ -468,8 +468,6 @@
     if(!closestFromTarget(e.target,'.custom-select')){
       document.querySelectorAll('.custom-select.is-open').forEach(function(select){select.classList.remove('is-open');});
     }
-    const imageLink=closestFromTarget(e.target,'a');
-    if(imageLink)primeLinkedPage(imageLink);
   });
 
   document.addEventListener('pointerenter',function(e){

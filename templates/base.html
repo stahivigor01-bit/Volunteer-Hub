@@ -15,12 +15,14 @@
   <link rel="icon" href="{% static 'favicon/favicon.ico' %}">
   <link rel="apple-touch-icon" href="{% static 'favicon/apple-touch-icon.png' %}">
   <link rel="manifest" href="{% static 'favicon/site.webmanifest' %}">
+  <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+  <link rel="dns-prefetch" href="//res.cloudinary.com">
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
   <script src="{% static 'js/htmx-lite.js' %}" defer></script>
   <script src="{% static 'js/alpine-lite.js' %}" defer></script>
   <script src="{% static 'js/app.js' %}" defer></script>
 </head>
-<body style="--auth-photo: url('{{ design_assets.community_care }}'); --default-initiative-photo: url('{{ design_assets.default_initiative }}');">
+<body style="--auth-photo: url('{{ design_assets.community_care|image_hero }}'); --default-initiative-photo: url('{{ design_assets.default_initiative|image_card }}');">
   <div class="map-grid"></div>
   <header class="site-header">
     <a class="brand" href="{% url 'home' %}">

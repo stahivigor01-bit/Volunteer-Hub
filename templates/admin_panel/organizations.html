@@ -17,7 +17,7 @@
     <div class="admin-grid">
       {% for org in organizations %}
         <article class="admin-card">
-          {% if org.logo %}<img src="{{ org.logo.url }}" alt="{{ org.name }}" loading="eager" decoding="async" fetchpriority="{% if forloop.counter <= 4 %}high{% else %}auto{% endif %}" style="height:150px;width:100%;object-fit:cover;border-radius:14px">{% endif %}
+          {% if org.logo %}<img src="{{ org.logo.url|image_logo }}" alt="{{ org.name }}" loading="{% if forloop.counter <= 4 %}eager{% else %}lazy{% endif %}" decoding="async" fetchpriority="{% if forloop.counter <= 4 %}high{% else %}low{% endif %}" width="520" height="320" style="height:150px;width:100%;object-fit:cover;border-radius:14px">{% endif %}
           <div class="capacity-line"><h3>{{ org.name }}</h3><span class="{{ org.status|status_class }}">{{ org.status|status_label }}</span></div>
           <p>{{ org.description|truncatechars:150 }}</p>
           <div class="status-line"><span>Місто</span><b>{{ org.city|default:'—' }}</b></div>

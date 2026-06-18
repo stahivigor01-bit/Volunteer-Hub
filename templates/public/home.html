@@ -2,7 +2,7 @@
 {% load static hub_extras %}
 {% block title %}Volunteer Hub — координація волонтерських ініціатив{% endblock %}
 {% block content %}
-<section class="hero poster-hero image-hero" style="--hero-photo: url('{{ design_assets.hero_volunteers }}')">
+<section class="hero poster-hero image-hero" style="--hero-photo: url('{{ design_assets.hero_volunteers|image_hero }}')">
   <div class="hero-copy">
     <p class="eyebrow">Волонтерська платформа</p>
     <h1>Координуйте допомогу там, де вона потрібна зараз</h1>
@@ -24,7 +24,7 @@
   {% for initiative in initiatives %}
     <article class="mission-card">
       <a href="{% url 'initiative_detail' initiative.slug %}" class="image-wrap">
-        {% if initiative.image %}<img src="{{ initiative.image.url }}" alt="{{ initiative.title }}" loading="eager" decoding="async" fetchpriority="{% if forloop.counter <= 3 %}high{% else %}auto{% endif %}">{% else %}<img src="{{ design_assets.default_initiative }}" alt="{{ initiative.title }}" loading="eager" decoding="async" fetchpriority="{% if forloop.counter <= 3 %}high{% else %}auto{% endif %}">{% endif %}
+        {% if initiative.image %}<img src="{{ initiative.image.url|image_card }}" alt="{{ initiative.title }}" loading="{% if forloop.counter <= 3 %}eager{% else %}lazy{% endif %}" decoding="async" fetchpriority="{% if forloop.counter <= 3 %}high{% else %}low{% endif %}" width="640" height="380">{% else %}<img src="{{ design_assets.default_initiative|image_card }}" alt="{{ initiative.title }}" loading="{% if forloop.counter <= 3 %}eager{% else %}lazy{% endif %}" decoding="async" fetchpriority="{% if forloop.counter <= 3 %}high{% else %}low{% endif %}" width="640" height="380">{% endif %}
         <span class="urgency-ribbon {{ initiative.urgency_level }}">{{ initiative.urgency_level|urgency_label }}</span>
       </a>
       <div class="card-body">
@@ -37,7 +37,7 @@
   {% endfor %}
 </div>
 <section class="split-section">
-  <div class="story-photo"><img src="{{ design_assets.aid_packing }}" alt="Волонтери пакують допомогу" loading="eager" decoding="async" fetchpriority="auto"></div>
+  <div class="story-photo"><img src="{{ design_assets.aid_packing|image_hero }}" alt="Волонтери пакують допомогу" loading="lazy" decoding="async" fetchpriority="low" width="1440" height="760"></div>
   <div class="timeline-card">
     <p class="eyebrow">Як це працює</p>
     <h2>Від заявки до підтверджених годин</h2>
@@ -50,7 +50,7 @@
 <div class="org-strip org-grid-scroll">
   {% for org in organizations %}
     <a href="{% url 'organization_detail' org.slug %}" class="org-chip">
-      {% if org.logo %}<img src="{{ org.logo.url }}" alt="{{ org.name }}" loading="eager" decoding="async" fetchpriority="auto">{% endif %}
+      {% if org.logo %}<img src="{{ org.logo.url|image_logo }}" alt="{{ org.name }}" loading="lazy" decoding="async" fetchpriority="low" width="520" height="320">{% endif %}
       <span>{{ org.name }}</span>
     </a>
   {% endfor %}

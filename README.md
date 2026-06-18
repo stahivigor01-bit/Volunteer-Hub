@@ -121,6 +121,19 @@ CLOUDINARY_API_SECRET=your-api-secret
 python manage.py upload_design_assets
 ```
 
+Перевірити, чи сторінки віддають оптимізовані Cloudinary URL, і заміряти час завантаження перших зображень:
+
+```bash
+python manage.py measure_images / /initiatives/ /organizations/
+python manage.py measure_images / /initiatives/ /organizations/ --fetch --limit 4
+```
+
+Прогріти CDN-кеш Cloudinary після seed або деплою, щоб перший користувач не чекав створення трансформацій:
+
+```bash
+python manage.py warm_cloudinary_images --limit 220 --workers 6
+```
+
 Перенести вже наявні локальні файли з `media/` у Cloudinary:
 
 ```bash
@@ -134,8 +147,9 @@ python manage.py migrate_media_to_cloudinary --delete-local
 
 ```bash
 pip install -r requirements.txt
-python manage.py collectstatic --no-input
+python manage.py collectstatic --no-input --upload-unhashed-files
 python manage.py migrate
+python manage.py warm_cloudinary_images --limit 220 --workers 6 || true
 ```
 
 У Render потрібно створити Python Web Service з GitHub-репозиторію та вказати:

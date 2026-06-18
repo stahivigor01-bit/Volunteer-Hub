@@ -37,6 +37,10 @@ if /I "%~1"=="--setup" (
   echo Seeding Neon database...
   "%PYTHON%" manage.py seed
   if errorlevel 1 goto fail
+
+  echo Warming Cloudinary image cache...
+  "%PYTHON%" manage.py warm_cloudinary_images --limit 220 --workers 6
+  if errorlevel 1 echo Image cache warmup skipped. The site can still start.
 ) else (
   echo Skipping database setup. Use start_windows.bat --setup after schema or seed changes.
 )

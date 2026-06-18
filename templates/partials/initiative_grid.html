@@ -3,7 +3,7 @@
   {% for initiative in page_obj.object_list %}
     <article class="mission-card">
       <a href="{% url 'initiative_detail' initiative.slug %}" class="image-wrap">
-        {% if initiative.image %}<img src="{{ initiative.image.url }}" alt="{{ initiative.title }}" loading="eager" decoding="async" fetchpriority="{% if forloop.counter <= 4 %}high{% else %}auto{% endif %}">{% else %}<img src="{{ design_assets.default_initiative }}" alt="{{ initiative.title }}" loading="eager" decoding="async" fetchpriority="{% if forloop.counter <= 4 %}high{% else %}auto{% endif %}">{% endif %}
+        {% if initiative.image %}<img src="{{ initiative.image.url|image_card }}" alt="{{ initiative.title }}" loading="{% if forloop.counter <= 4 %}eager{% else %}lazy{% endif %}" decoding="async" fetchpriority="{% if forloop.counter <= 4 %}high{% else %}low{% endif %}" width="640" height="380">{% else %}<img src="{{ design_assets.default_initiative|image_card }}" alt="{{ initiative.title }}" loading="{% if forloop.counter <= 4 %}eager{% else %}lazy{% endif %}" decoding="async" fetchpriority="{% if forloop.counter <= 4 %}high{% else %}low{% endif %}" width="640" height="380">{% endif %}
         <span class="urgency-ribbon {{ initiative.urgency_level }}">{{ initiative.urgency_level|urgency_label }}</span>
         {% if initiative.user_application_status %}
           <span class="involvement-ribbon">

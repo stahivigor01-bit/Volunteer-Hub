@@ -134,6 +134,13 @@ python manage.py measure_images / /initiatives/ /organizations/ --fetch --limit 
 python manage.py warm_cloudinary_images --limit 220 --workers 6
 ```
 
+Перевірити або видалити Cloudinary-файли, які вже не використовуються в БД чи design manifest:
+
+```bash
+python manage.py cleanup_cloudinary_assets
+python manage.py cleanup_cloudinary_assets --delete --min-age-hours 1
+```
+
 Після ручного масового видалення ініціатив або організацій можна перевірити й прибрати записи, що втратили зв'язки:
 
 ```bash
@@ -156,6 +163,9 @@ python manage.py migrate_media_to_cloudinary --delete-local
 pip install -r requirements.txt
 python manage.py collectstatic --no-input --upload-unhashed-files
 python manage.py migrate
+if [ "${CLOUDINARY_CLEANUP_ON_START:-1}" = "1" ]; then
+  python manage.py cleanup_cloudinary_assets --delete --min-age-hours "${CLOUDINARY_CLEANUP_MIN_AGE_HOURS:-1}" || true
+fi
 python manage.py warm_cloudinary_images --limit 220 --workers 6 || true
 ```
 
@@ -163,7 +173,7 @@ python manage.py warm_cloudinary_images --limit 220 --workers 6 || true
 
 ```text
 Build Command: ./build.sh
-Start Command: gunicorn config.wsgi:application
+Start Command: ./start_render.sh
 ```
 
 Обов'язкові Environment Variables на Render:
@@ -175,6 +185,8 @@ DATABASE_URL=postgresql://USER:PASSWORD@HOST/neondb?sslmode=require
 CLOUDINARY_CLOUD_NAME=your-cloud-name
 CLOUDINARY_API_KEY=your-api-key
 CLOUDINARY_API_SECRET=your-api-secret
+CLOUDINARY_CLEANUP_ON_START=1
+CLOUDINARY_CLEANUP_MIN_AGE_HOURS=1
 NEON_WAKE_ENABLED=1
 NEON_API_KEY=your-neon-api-key
 NEON_PROJECT_ID=your-neon-project-id

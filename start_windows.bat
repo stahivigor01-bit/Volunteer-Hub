@@ -45,6 +45,13 @@ if /I "%~1"=="--setup" (
   echo Skipping database setup. Use start_windows.bat --setup after schema or seed changes.
 )
 
+if /I "%CLOUDINARY_CLEANUP_ON_START%"=="1" (
+  if "%CLOUDINARY_CLEANUP_MIN_AGE_HOURS%"=="" set "CLOUDINARY_CLEANUP_MIN_AGE_HOURS=1"
+  echo Cleaning unused Cloudinary assets...
+  "%PYTHON%" manage.py cleanup_cloudinary_assets --delete --min-age-hours "%CLOUDINARY_CLEANUP_MIN_AGE_HOURS%"
+  if errorlevel 1 echo Cloudinary cleanup skipped. The site can still start.
+)
+
 set "HOST=127.0.0.1"
 set "PORT=8000"
 set "PREFERRED_PORT=8000"

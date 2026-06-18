@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
 set -o errexit
 
-pip install -r requirements.txt
-python manage.py collectstatic --no-input --upload-unhashed-files
-python manage.py migrate
 if [ "${CLOUDINARY_CLEANUP_ON_START:-1}" = "1" ]; then
   python manage.py cleanup_cloudinary_assets --delete --min-age-hours "${CLOUDINARY_CLEANUP_MIN_AGE_HOURS:-1}" || true
 fi
-python manage.py warm_cloudinary_images --limit 220 --workers 6 || true
+
+exec gunicorn config.wsgi:application

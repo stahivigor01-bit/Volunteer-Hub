@@ -303,7 +303,6 @@
   }
 
   const imageCache=new Map();
-  const pageImageCache=new Map();
 
   function normalizeImageUrl(value){
     if(!value)return '';
@@ -393,34 +392,6 @@
     return primeImages(doc,options);
   }
 
-  function isImagePageLink(anchor){
-    if(!anchor || !anchor.href || anchor.target || anchor.hasAttribute('download'))return false;
-    let url;
-    try{url=new URL(anchor.href,window.location.href);}catch(e){return false;}
-    if(url.origin!==window.location.origin)return false;
-    const path=url.pathname;
-    return path==='/' || path==='/initiatives/' || path.startsWith('/initiatives/') || path==='/organizations/' || path.startsWith('/organizations/');
-  }
-
-  function primeLinkedPage(anchor){
-    if(!isImagePageLink(anchor))return;
-    const url=new URL(anchor.href,window.location.href);
-    const key=url.pathname + url.search;
-    if(pageImageCache.has(key))return pageImageCache.get(key);
-    const promise=fetch(url.href,{credentials:'same-origin',headers:{'X-Image-Prefetch':'1'}})
-      .then(function(response){
-        const type=response.headers.get('content-type') || '';
-        if(!response.ok || !type.includes('text/html'))return;
-        return response.text();
-      })
-      .then(function(html){
-        if(html)return primeHtmlImages(html,{limit:4});
-      })
-      .catch(function(){});
-    pageImageCache.set(key,promise);
-    return promise;
-  }
-
   function scheduleImageWarmup(root){
     hintImages(root);
     const idle=window.requestIdleCallback || function(callback){return setTimeout(callback,120);};
@@ -469,18 +440,6 @@
       document.querySelectorAll('.custom-select.is-open').forEach(function(select){select.classList.remove('is-open');});
     }
   });
-
-  document.addEventListener('pointerenter',function(e){
-    primeLinkedPage(closestFromTarget(e.target,'a'));
-  },true);
-
-  document.addEventListener('focusin',function(e){
-    primeLinkedPage(closestFromTarget(e.target,'a'));
-  });
-
-  document.addEventListener('touchstart',function(e){
-    primeLinkedPage(closestFromTarget(e.target,'a'));
-  },{passive:true});
 
   document.addEventListener('keydown',function(e){
     if(e.key==='Escape'){

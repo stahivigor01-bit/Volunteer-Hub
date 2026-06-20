@@ -22,7 +22,7 @@ if not exist "%PYTHON%" (
   exit /b 1
 )
 
-"%PYTHON%" -c "import django, cloudinary, dj_database_url, psycopg" > nul 2> nul
+"%PYTHON%" -c "import django, cloudinary, dj_database_url, psycopg, waitress" > nul 2> nul
 if errorlevel 1 (
   echo Installing Python dependencies...
   "%PYTHON%" -m pip install -r requirements.txt
@@ -73,6 +73,29 @@ set "HEALTH_URL=http://%HOST%:%PORT%/healthz/"
 if not "%PORT%"=="%PREFERRED_PORT%" echo Port %PREFERRED_PORT% is busy. Using %PORT% instead.
 echo Starting Volunteer Hub at %URL%
 start "" /min "%PYTHON%" scripts\open_when_ready.py "%HEALTH_URL%" "%URL%"
+
+if /I "%~1"=="--dev" goto start_dev
+
+set "DEBUG=0"
+echo Building optimized static files...
+"%PYTHON%" manage.py collectstatic --noinput
+if errorlevel 1 goto fail
+
+set "WAITRESS=.venv\Scripts\waitress-serve.exe"
+if not exist "%WAITRESS%" (
+  echo Missing %WAITRESS%.
+  pause
+  exit /b 1
+)
+if "%WAITRESS_THREADS%"=="" set "WAITRESS_THREADS=6"
+echo Starting production server with %WAITRESS_THREADS% worker threads...
+"%WAITRESS%" --listen=%HOST%:%PORT% --threads=%WAITRESS_THREADS% config.wsgi:application
+pause
+exit /b 0
+
+:start_dev
+set "DEBUG=1"
+echo Starting Django development server...
 "%PYTHON%" manage.py runserver %HOST%:%PORT%
 pause
 exit /b 0

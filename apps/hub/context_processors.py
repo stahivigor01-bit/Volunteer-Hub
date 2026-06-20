@@ -38,13 +38,14 @@ def header_stats(request):
 
 @lru_cache(maxsize=1)
 def design_asset_urls():
+    local_fallback = static('images/og-preview.png')
     fallbacks = {
-        'hero_volunteers': static('images/photos/hero-volunteers.jpg'),
-        'aid_packing': static('images/photos/aid-packing.jpg'),
-        'community_care': static('images/photos/community-care.jpg'),
-        'outdoor_aid': static('images/photos/outdoor-aid.jpg'),
-        'donation_work': static('images/photos/donation-work.jpg'),
-        'default_initiative': static('images/photos/default-initiative.jpg'),
+        'hero_volunteers': local_fallback,
+        'aid_packing': local_fallback,
+        'community_care': local_fallback,
+        'outdoor_aid': local_fallback,
+        'donation_work': local_fallback,
+        'default_initiative': local_fallback,
     }
     manifest = getattr(settings, 'DESIGN_ASSETS_MANIFEST', None)
     if manifest and manifest.exists():
@@ -53,6 +54,11 @@ def design_asset_urls():
         except (OSError, json.JSONDecodeError):
             cloudinary_urls = {}
         fallbacks.update({key: value for key, value in cloudinary_urls.items() if value})
+        cloudinary_fallback = cloudinary_urls.get('hero_volunteers') or cloudinary_urls.get('aid_packing')
+        if cloudinary_fallback:
+            for key, value in fallbacks.items():
+                if value == local_fallback:
+                    fallbacks[key] = cloudinary_fallback
     return fallbacks
 
 

@@ -28,6 +28,12 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\setup_neon.ps1
 start_windows.bat
 ```
 
+Ця команда запускає production-подібний сервер Waitress з `DEBUG=0` і попередньо збирає стиснені статичні файли. Для режиму розробки з автоматичним перезавантаженням використовуйте:
+
+```bat
+start_windows.bat --dev
+```
+
 Якщо потрібно явно виконати міграції та seed перед стартом:
 
 ```bat
